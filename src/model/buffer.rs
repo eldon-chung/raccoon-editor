@@ -26,4 +26,8 @@ impl Buffer {
 	pub fn remove(&mut self, idx: usize) -> char {
 		self.contents.remove(idx)
 	}
+
+	pub fn as_str(&self) -> &str {
+		self.contents.as_str()
+	}
 }

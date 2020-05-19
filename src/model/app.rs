@@ -33,4 +33,20 @@ impl App {
 	pub fn app_mode(&self) -> AppMode {
 		self.app_mode
 	}
+
+	pub fn get_text_as_iter(&self) -> Vec<&str> {
+		vec![self.buffer.as_str()]
+	}
+
+	pub fn add_char(&mut self, c: char) {
+		self.buffer.insert(self.cursor_position, c);
+		self.cursor_position += 1;
+	}
+
+	pub fn remove_char(&mut self) {
+		if self.cursor_position > 1 {
+			self.cursor_position -= 1;
+			self.buffer.remove(self.cursor_position);
+		}
+	}
 }
