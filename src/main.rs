@@ -1,3 +1,8 @@
+mod utils;
+use crate::utils::events::Event;
+
+mod model;
+use crate::model::buffer::Buffer;
 
 fn main() {
     println!("Hello, world!");
@@ -9,5 +14,5 @@ fn main() {
     // Loop:
     // get next event from event queue
     // handle next event, update program state
-    
+
 }
