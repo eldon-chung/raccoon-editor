@@ -2,7 +2,7 @@ mod utils;
 use crate::utils::events::Event;
 
 mod model;
-use crate::model::buffer::Buffer;
+use crate::model::app::App;
 
 fn main() {
     println!("Hello, world!");
