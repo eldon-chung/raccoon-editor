@@ -49,4 +49,16 @@ impl App {
 			self.buffer.remove(self.cursor_position);
 		}
 	}
+
+	pub fn move_cursor_left(&mut self) {
+		if self.cursor_position > 0 {
+			self.cursor_position -= 1;
+		}
+	}
+
+	pub fn move_cursor_right(&mut self) {
+		if self.cursor_position < self.buffer.len() - 1 {
+			self.cursor_position += 1;
+		}
+	}
 }

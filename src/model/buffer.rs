@@ -30,4 +30,8 @@ impl Buffer {
 	pub fn as_str(&self) -> &str {
 		self.contents.as_str()
 	}
+
+	pub fn len(&self) -> usize {
+		self.contents.len()
+	}
 }
