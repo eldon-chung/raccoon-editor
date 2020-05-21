@@ -52,6 +52,8 @@ fn main() -> Result<(), io::Error> {
 
 fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
 	match event {
+        // Full list of keys can be found at
+        // https://docs.rs/termion/1.1.1/termion/event/enum.Key.html
 		Event::Tick{..} => Ok(QuitOption::NotQuitting),
 		Event::Input{key: Key::Char('q'), ..} => Ok(QuitOption::Quitting),
 		Event::Input{key: Key::Char(c), ..} => {
@@ -62,14 +64,16 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
 			app.remove_char();
 			Ok(QuitOption::NotQuitting)
 		},
+        Event::Input{key: Key::Right, ..} => {
+            app.move_cursor_right();
+            Ok(QuitOption::NotQuitting)
+        },
+        Event::Input{key: Key::Left, ..} => {
+            app.move_cursor_left();
+            Ok(QuitOption::NotQuitting)
+        }
 		_ => Ok(QuitOption::NotQuitting),
 	}
 
 }
-
-
-
-
-
-
 
