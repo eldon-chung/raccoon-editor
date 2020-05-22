@@ -48,9 +48,16 @@ impl BufferNode {
 }
 
 pub struct Buffer {
-	original_str: String,
-	added_str: String,
+	original_str: Vec<char>,
+	added_str: Vec<char>,
 	node_list: Vec<BufferNode>,
+
+	// an important invariant is how the cursor is going to be placed.
+	//	this is going to be maintained throughout the operations.
+	//  if the cursor is in between two nodes, it will always be at the 0 index of the 
+	//	node on the right, rather than the end index of the left node.
+	//	the only time the cursor will be at the end index of a node is if there is
+	// 	no other node to its right.
 }
 
 impl Buffer {
@@ -66,8 +73,8 @@ impl Buffer {
 	pub fn new() -> Buffer {
 		let first_node = BufferNode::new(BufferType::Original, 0, 0, vec![0]);
 		Buffer {
-			original_str: String::new(),
-			added_str: String::new(),
+			original_str: Vec::new(),
+			added_str: Vec::new(),
 			node_list: vec![first_node],
 		}
 	}
@@ -76,8 +83,8 @@ impl Buffer {
 		let offsets = Buffer::get_offsets(&original_str);
 		let first_node = BufferNode::new(BufferType::Original, 0, original_str.len(), offsets);
 		Buffer {
-			original_str: original_str,
-			added_str: String::new(),
+			original_str: original_str.chars().collect(),
+			added_str: Vec::new(),
 			node_list: vec![first_node],
 		}
 	}
@@ -97,7 +104,8 @@ impl Buffer {
 		let new_node = BufferNode::new(BufferType::Added, idx, offset, line_offsets);
 
 		// append string to add_str
-		self.added_str.push_str(&string);
+		let mut vec_converted = string.chars().collect::<Vec<char>>();
+		self.added_str.append(&mut vec_converted);
 
 		// split the current node we are on into two
 		let node_to_split = &mut self.node_list[cursor.node_idx];
@@ -129,7 +137,6 @@ impl Buffer {
 
 			// split the line_offsets based on where the cursor is
 			let drain_from_idx = cursor.line_idx;
-			println!("done part 0! drain from idx {}", drain_from_idx);
 			let left_line_offsets = line_offsets.drain(..=drain_from_idx).collect();
 			let node_offset = cursor.node_offset;
 			let mut right_line_offsets: Vec<usize> = line_offsets.drain( .. )
@@ -154,8 +161,99 @@ impl Buffer {
 		}
 	}
 
-	pub fn remove(&mut self, cursor: &mut Cursor) -> char {
-		todo!();
+	pub fn remove(&mut self, cursor: &mut Cursor) {
+		// in general there are two cases, whether the cursor is between
+		// 	two nodes or in the middle of a single node. both cases are handled
+		//  quite differently
+
+		let mut node_idx = cursor.node_idx;
+		let mut node_offset = cursor.node_offset;
+
+
+		if node_offset == 0 {
+			// if we're at the head of the file there's nothing to do;
+			if node_idx == 0 { return; }
+			// else reference the previous node
+			node_idx -= 1;
+			node_offset = self.node_list[node_idx].offset();
+		}
+
+		let from = self.node_list[node_idx].from();
+		let index = self.node_list[node_idx].index();
+		let line_offsets = &mut self.node_list[node_idx].line_offsets();
+		let mut line_offsets: Vec<usize> = line_offsets.drain(..).collect();
+
+		if node_offset == self.node_list[node_idx].offset() {
+			// an edge case is that this is the empty node that appears when
+			// we've just constructed a file. in that case we should return as well
+			if node_idx == 0 &&  node_offset == 0 { return; }
+			// just reduce the offset value by 1 here
+			node_offset -= 1;
+			if node_offset == 0 {
+				// node is now empty, just delete it and move the cursor
+				self.node_list.remove(node_idx);
+				cursor.node_offset = 0;
+				cursor.line_idx = 0;
+				cursor.line_offset = 0;
+				return;
+			}
+			let removed_char = match from {
+				BufferType::Original => self.original_str[index + node_offset],
+				BufferType::Added => self.added_str[index + node_offset],
+			};
+			if removed_char == '\n' {
+				line_offsets.pop();
+			}
+			let new_node = BufferNode::new(from, index, node_offset, line_offsets);
+			// in this case the cursor position does not need to be updated?
+			//  unless the cursor was at the end of the entire buffer
+			if cursor.node_idx == self.node_list.size() - 1 {
+				cursor.node_offset -= 1;
+			}
+			self.node_list.insert(node_idx, new_node);
+			self.node_list.remove(node_idx + 1);
+		} else {
+			// split the line_offsets based on where the cursor is
+			let drain_from_idx = cursor.line_idx;
+			let left_line_offsets = line_offsets.drain(..=drain_from_idx).collect();
+			let node_offset = cursor.node_offset;
+			let mut right_line_offsets: Vec<usize> = line_offsets.drain( .. )
+												.map(|x| x - node_offset)
+												.collect();
+			right_line_offsets.insert(0, 0);
+
+			let removed_char = match from {
+				BufferType::Original => self.original_str[index + node_offset],
+				BufferType::Added => self.added_str[index + node_offset],
+			};
+			if removed_char == '\n' {
+				left_line_offsets.pop();
+			}
+
+			// construct the left and right node
+			let left_node = BufferNode::new(from, index, cursor.node_offset - 1, left_line_offsets);
+			let right_node = BufferNode::new(from, index + cursor.node_offset, offset - cursor.node_offset, right_line_offsets);
+
+			if cursor.node_offset - 1 == 0 {
+				// the left node is empty, we just need to insert the right node
+				self.node_list.insert(node_idx, right_node);
+				self.node_list.remove(node_idx + 1);
+
+				cursor.node_offset = 0;
+				cursor.line_idx = 0;
+				cursor.line_offset = 0;
+			} else {
+				self.node_list.insert(node_idx, left_node);
+				self.node_list.insert(node_idx + 1, right_node);
+				self.node_list.remove(node_idx + 2);
+
+				cursor.node_idx += 1;
+				cursor.node_offset = 0;
+				cursor.line_idx = 0;
+				cursor.line_offset = 0;
+			}
+		}
+
 	}
 
 	pub fn remove_word(&mut self, cursor: &mut Cursor) -> char {
