@@ -6,7 +6,6 @@ mod buffer_tests {
 		string.as_bytes().to_vec()
 	}
 
-	// get_offsets_tests
 	#[test]
 	fn get_offsets_none() {
 		let string = String::from("abc");
@@ -49,7 +48,6 @@ mod buffer_tests {
 		assert_eq!(offsets, &[0, 1, 2, 3]);
 	}
 
-	// insert_tests
 	#[test]
 	fn insert_char_into_fresh_buffer() {
 		let mut cursor = Cursor::new();
