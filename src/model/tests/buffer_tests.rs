@@ -321,4 +321,36 @@ mod buffer_tests {
 		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
 		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
 	}
+
+	#[test]
+	fn get_str_from_fresh_buffer() {
+		let mut buffer = Buffer::new();
+		let string = buffer.as_str();
+		assert_eq!(string, "");
+	}
+
+	#[test]
+	fn get_str_from_single_node_buffer() {
+		let mut buffer = Buffer::with_contents(String::from("\nde\nf\n"));
+		let string = buffer.as_str();
+		assert_eq!(string, "\nde\nf\n");
+	}
+
+	#[test]
+	fn get_str_from_multiple_node_buffer() {
+		// warning! this test is coupled with the functionality of insert right now
+		//	a better way would be to explicitly initialise the contents of the buffer
+		let mut buffer = Buffer::with_contents(String::from("\nde\nf\n"));
+		let mut cursor = Cursor::new();
+
+		buffer.insert_str(&mut cursor, String::from("ab\nc!\n"));
+		cursor.node_idx = 1;
+		cursor.node_offset = 6;
+		cursor.line_idx = 3;
+		cursor.line_offset = 0;
+		buffer.insert_str(&mut cursor, String::from("ghi"));
+
+		let string = buffer.as_str();
+		assert_eq!(string, "ab\nc!\n\nde\nf\nghi");
+	}
 }
