@@ -9,8 +9,9 @@ matrix:
       rust: nightly
     - os: linux
       rust: stable
+
 script:
-  - |
+    - |
       if [ "$TRAVIS_RUST_VERSION" = "nightly" ] && [ -z "$TRAVIS_TAG" ]; then
         export CARGO_INCREMENTAL=0;
         export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort";
@@ -26,23 +27,3 @@ script:
           cargo build --verbose --all
           cargo test --verbose --all
       fi
-
-coverage:
-  status:
-    project:
-      default:
-        # basic
-        target: auto
-        threshold: 0%
-        base: auto 
-        flags: 
-          - unit
-        paths: 
-          - "src"
-       # advanced
-        branches: 
-          - master
-        if_not_found: success
-        if_ci_failed: error
-        informational: false
-        only_pulls: false
