@@ -292,11 +292,6 @@ impl Buffer {
 
 	}
 
-	pub fn len(&self) -> usize {
-		todo!();
-	}
-
-
 	pub fn move_cursor_up(&self, cursor: &mut Cursor) {
 		todo!();
 	}
