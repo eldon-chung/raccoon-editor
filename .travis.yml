@@ -1,16 +1,28 @@
 language: rust
 rust:
-  - stable
-jobs:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
+  - 1.9.0
 
-cache: cargo
-script:
-  - which cargo-make || cargo install cargo-make
-  - cargo make ci-flow
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - cmake
+      - gcc
+      - binutils-dev
 
-env:
-  global:
-    - CARGO_MAKE_RUN_CODECOV="true"
+after_success: |
+  wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
+  tar xzf master.tar.gz &&
+  cd kcov-master &&
+  mkdir build &&
+  cd build &&
+  cmake .. &&
+  make &&
+  sudo make install &&
+  cd ../.. &&
+  rm -rf kcov-master &&
+  kcov --exclude-pattern=/.cargo,/usr/lib --verify target/cov target/debug/raccoon_editor-* &&
+  bash <(curl -s https://codecov.io/bash) &&
+  echo "Uploaded code coverage"
