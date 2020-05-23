@@ -1,6 +1,9 @@
 language: rust
+
+sudo: required
+
 rust:
-  - 1.42.0
+  - stable
 
 addons:
   apt:
@@ -11,9 +14,7 @@ addons:
       - cmake
       - gcc
       - binutils-dev
-script:
-  - cargo build
-  - cargo test
+      - libiberty-dev
 
 after_success: |
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
@@ -23,9 +24,9 @@ after_success: |
   cd build &&
   cmake .. &&
   make &&
-  sudo make install &&
+  make install DESTDIR=../../kcov-build &&
   cd ../.. &&
   rm -rf kcov-master &&
-  kcov --exclude-pattern=/.cargo,/usr/lib --verify target/cov target/debug/raccoon_editor-* &&
+  for file in target/debug/examplerust-*; do [ -x "${file}" ] || continue; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
   bash <(curl -s https://codecov.io/bash) &&
   echo "Uploaded code coverage"
