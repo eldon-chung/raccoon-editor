@@ -1,3 +1,5 @@
+use std::str;
+
 use crate::utils::Cursor;
 
 #[allow(dead_code)]
@@ -273,8 +275,21 @@ impl Buffer {
 		todo!();
 	}
 
-	pub fn as_str(&self) -> &str {
-		todo!();
+	pub fn as_str(&self) -> String {
+		let serialised_str = self.node_list.iter()
+								.fold( String::new(), |mut acc, node| {
+									let source = match node.from() {
+										BufferType::Original => &self.original_str,
+										BufferType::Added => &self.added_str,
+									};
+									let slice = &source[node.index()..node.index() + node.offset()];
+									let chunk = str::from_utf8(slice).unwrap();
+									acc.push_str(chunk);
+									acc
+									}
+								);
+		serialised_str
+
 	}
 
 	pub fn len(&self) -> usize {

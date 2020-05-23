@@ -36,7 +36,7 @@ impl App {
 		self.app_mode
 	}
 
-	pub fn get_text_as_iter(&self) -> Vec<&str> {
+	pub fn get_text_as_iter(&self) -> Vec<String> {
 		vec![self.buffer.as_str()]
 	}
 
