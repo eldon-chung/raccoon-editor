@@ -45,6 +45,14 @@ impl BufferNode {
 		&mut self.line_offsets
 	}
 
+	fn line_offset_at(&self, idx: usize) -> usize {
+		self.line_offsets[idx]
+	}
+
+	fn line_offsets_len(&self) -> usize {
+		self.line_offsets.len()
+	}
+
 	fn last_line_offset(&self) -> usize {
 		*self.line_offsets.last().unwrap()
 	}
@@ -277,7 +285,7 @@ impl Buffer {
 
 	pub fn as_str(&self) -> String {
 		let serialised_str = self.node_list.iter()
-								.fold( String::new(), |mut acc, node| {
+								.fold(String::new(), |mut acc, node| {
 									let source = match node.from() {
 										BufferType::Original => &self.original_str,
 										BufferType::Added => &self.added_str,
@@ -301,11 +309,89 @@ impl Buffer {
 	}
 
 	pub fn move_cursor_left(&self, cursor: &mut Cursor) {
-		todo!();
+		if cursor.node_idx == 0 && cursor.node_offset == 0 {
+			return;
+		}
+
+		if cursor.node_offset == 0 {
+			cursor.node_idx -= 1;
+
+			let current_node: &BufferNode = &self.node_list[cursor.node_idx];
+			cursor.node_offset = current_node.offset() - 1;
+			let index = current_node.index();
+			let last_char = match current_node.from() {
+				BufferType::Original => self.original_str[index + cursor.node_offset],
+				BufferType::Added => self.added_str[index + cursor.node_offset],
+			};
+
+			if last_char == '\n' as u8 {
+				cursor.line_idx = current_node.line_offsets_len() - 2;
+				cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+			} else {
+				cursor.line_idx = current_node.line_offsets_len() - 1;
+				cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+			}
+		} else {
+			cursor.node_offset -= 1;
+
+			let current_node: &BufferNode = &self.node_list[cursor.node_idx];
+			let index = current_node.index();
+			let last_char = match current_node.from() {
+				BufferType::Original => self.original_str[index + cursor.node_offset + 1],
+				BufferType::Added => self.added_str[index + cursor.node_offset + 1],
+			};
+
+			if last_char == '\n' as u8 {
+				cursor.line_idx -= 1;
+				cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+			}
+		}
 	}
 
 	pub fn move_cursor_right(&self, cursor: &mut Cursor) {
-		todo!();
+		if cursor.node_offset == self.node_list[cursor.node_idx].offset() {
+			assert_eq!(cursor.node_idx, self.node_list.len() - 1);
+			return;
+		}
+
+		let current_node: &BufferNode = &self.node_list[cursor.node_idx];
+		if cursor.node_idx == self.node_list.len() - 1 {
+			cursor.node_offset += 1;
+
+			let index = current_node.index();
+			let last_char = match current_node.from() {
+				BufferType::Original => self.original_str[index + cursor.node_offset],
+				BufferType::Added => self.added_str[index + cursor.node_offset],
+			};
+
+			if last_char == '\n' as u8 {
+				cursor.line_idx += 1;
+				cursor.line_offset = 0;
+			} else {
+				cursor.line_offset += 1;
+			}
+			return;
+		}
+
+		if cursor.node_offset + 1 == current_node.offset() {
+			cursor.node_idx += 1;
+			cursor.node_offset = 0;
+			cursor.line_idx = 0;
+			cursor.line_offset = 0;
+		} else {
+			cursor.node_offset += 1;
+			let index = current_node.index();
+			let last_char = match current_node.from() {
+				BufferType::Original => self.original_str[index + cursor.node_offset],
+				BufferType::Added => self.added_str[index + cursor.node_offset],
+			};
+			if last_char == '\n' as u8 {
+				cursor.line_idx += 1;
+				cursor.line_offset = 0;
+			} else {
+				cursor.line_offset += 1;
+			}
+		}
 	}
 
 }
