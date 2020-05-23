@@ -2,8 +2,8 @@
 mod buffer_tests {
 	use super::super::*;
 
-	fn stov(string: &'static str) -> Vec<char> {
-		string.chars().collect::<Vec<char>>()
+	fn stov(string: &'static str) -> Vec<u8> {
+		string.as_bytes().to_vec()
 	}
 
 	// get_offsets_tests

@@ -49,8 +49,8 @@ impl BufferNode {
 }
 
 pub struct Buffer {
-	original_str: Vec<char>,
-	added_str: Vec<char>,
+	original_str: Vec<u8>,
+	added_str: Vec<u8>,
 	node_list: Vec<BufferNode>,
 
 	// an important invariant is how the cursor is going to be placed.
@@ -84,7 +84,7 @@ impl Buffer {
 		let offsets = Buffer::get_offsets(&original_str);
 		let first_node = BufferNode::new(BufferType::Original, 0, original_str.len(), offsets);
 		Buffer {
-			original_str: original_str.chars().collect(),
+			original_str: original_str.as_bytes().to_vec(),
 			added_str: Vec::new(),
 			node_list: vec![first_node],
 		}
@@ -105,7 +105,7 @@ impl Buffer {
 		let new_node = BufferNode::new(BufferType::Added, idx, offset, line_offsets);
 
 		// append string to add_str
-		let mut vec_converted = string.chars().collect::<Vec<char>>();
+		let mut vec_converted = string.as_bytes().to_vec();
 		self.added_str.append(&mut vec_converted);
 
 		if self.node_list.len() == 0 {
@@ -214,7 +214,7 @@ impl Buffer {
 				BufferType::Original => self.original_str[index + node_offset],
 				BufferType::Added => self.added_str[index + node_offset],
 			};
-			if removed_char == '\n' {
+			if removed_char == '\n' as u8 {
 				line_offsets.pop();
 			}
 			let new_node = BufferNode::new(from, index, node_offset, line_offsets);
@@ -239,7 +239,7 @@ impl Buffer {
 				BufferType::Original => self.original_str[index + node_offset - 1],
 				BufferType::Added => self.added_str[index + node_offset - 1],
 			};
-			if removed_char == '\n' {
+			if removed_char == '\n' as u8 {
 				left_line_offsets.pop();
 			}
 
