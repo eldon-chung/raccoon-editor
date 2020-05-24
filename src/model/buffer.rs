@@ -151,8 +151,9 @@ impl Buffer {
             assert_eq!(cursor.node_offset, 0);
             assert_eq!(cursor.line_idx, 0);
             assert_eq!(cursor.line_offset, 0);
-            // just insert the new node before cursor
-            self.node_list.insert(cursor.node_offset, new_node);
+            // just insert the new node before current node
+            //	which is where the cursor is
+            self.node_list.insert(cursor.node_idx, new_node);
             cursor.node_idx += 1;
         } else {
             // split the node into two and insert it in between
@@ -169,8 +170,18 @@ impl Buffer {
             right_line_offsets.insert(0, 0);
 
             // construct left and right nodes
-            let left_node = BufferNode::new(from, index, cursor.node_offset, left_line_offsets );
-            let right_node = BufferNode::new(from, index + cursor.node_offset, offset - cursor.node_offset, right_line_offsets);
+            let left_node = BufferNode::new(
+            					from,
+            					index,
+            					cursor.node_offset,
+            					left_line_offsets
+            				);
+            let right_node = BufferNode::new(
+            					from,
+            					index + cursor.node_offset,
+            					offset - cursor.node_offset,
+            					right_line_offsets
+            				);
 
             // add the left, mid, right nodes in in that order to the list
             //  then remove the node that was split into those three
@@ -296,15 +307,18 @@ impl Buffer {
                 left_line_offsets.pop();
             }
 
-            // rebuild the line_offsets list for both nodes
-            let left_node = BufferNode::new(from,
+            let left_node = BufferNode::new
+            					from,
                                 index,
                                 index + cursor.node_offset - 1,
-                                left_line_offsets);
-            let right_node = BufferNode::new(from,
+                                left_line_offsets
+                            );
+            let right_node = BufferNode::new(
+            					from,
                                 index + cursor.node_offset,
                                 offset - cursor.node_offset,
-                                right_line_offsets);
+                                right_line_offsets
+                            );
 
             // insert both the left node and the right node
             //  and remove the node that was split
@@ -444,7 +458,7 @@ impl Buffer {
         	if cursor.node_idx < current_node.line_offsets_len() - 1
         		&&	cursor.node_offset
         			== current_node.line_offset_at(cursor.line_idx + 1) {
-        		//	cursor shoulve have just passed over a '\n'
+        		// cursor should have just passed over a '\n'
         		cursor.line_idx += 1;
         		cursor.line_offset = 0;
         	} else {

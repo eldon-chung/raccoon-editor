@@ -334,6 +334,7 @@ mod buffer_tests {
 		buffer.remove(&mut cursor);
 
 		assert_eq!(buffer.original_str, stov("\nde\nf\n"), "original_str mismatch");
+		assert_eq!(buffer.added_str, stov(""), "added_str mismatch");
 
 		let node_0 = BufferNode::new(BufferType::Original, 0, 3, vec![0, 1]);
 		let node_1 = BufferNode::new(BufferType::Original, 4, 2, vec![0, 2]);
@@ -362,7 +363,7 @@ mod buffer_tests {
 
 
 		assert_eq!(buffer.original_str, stov(""), "original_str mismatch");
-		assert_eq!(buffer.added_str, stov("abcd"), "original_str mismatch");
+		assert_eq!(buffer.added_str, stov("abcd"), "added_str mismatch");
 
 		assert_eq!(buffer.node_list, Vec::new(), "node_list mismatch");
 
@@ -709,6 +710,32 @@ mod buffer_tests {
 		buffer.move_cursor_right(&mut cursor);
 
 		assert_eq!(cursor.node_idx, 1, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn insert_left_insert_right_insert() {
+		let mut buffer = Buffer::new();
+		let mut cursor = Cursor::new();
+
+		buffer.insert(&mut cursor, 'a');
+		buffer.move_cursor_left(&mut cursor);
+		buffer.insert(&mut cursor, 'b');
+		buffer.move_cursor_right(&mut cursor);
+		buffer.insert(&mut cursor, 'c');
+
+		let node_0 = BufferNode::new(BufferType::Added, 1, 1, vec![0]);
+		let node_1 = BufferNode::new(BufferType::Added, 0, 1, vec![0]);
+		let node_2 = BufferNode::new(BufferType::Added, 2, 1, vec![0]);
+
+		assert_eq!(buffer.original_str, stov(""), "original_str mismatch");
+		assert_eq!(buffer.added_str, stov("abc"), "added_str mismatch");
+
+		assert_eq!(buffer.node_list, vec![node_0, node_1, node_2], "node_list mismatch");
+
+		assert_eq!(cursor.node_idx, 2, "cursor.node_idx mismatch");
 		assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
 		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
 		assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
