@@ -403,4 +403,122 @@ mod buffer_tests {
 		let string = buffer.as_str();
 		assert_eq!(string, "ab\nc!\n\nde\nf\nghi");
 	}
+
+	#[test]
+	fn move_cursor_left_on_fresh_buffer() {
+		let mut buffer = Buffer::new();
+		let mut cursor = Cursor::new();
+
+		buffer.move_cursor_left(&mut cursor);
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn move_cursor_left_idempotent_on_filled_buffer() {
+		let mut buffer = Buffer::with_contents(String::from("abc"));
+		let mut cursor = Cursor::new();
+
+		buffer.move_cursor_left(&mut cursor);
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn move_cursor_left_once_on_filled_buffer() {
+		let mut buffer = Buffer::with_contents(String::from("abc"));
+		let mut cursor = Cursor::new();
+		cursor.node_offset = 3;
+		cursor.line_offset = 3;
+
+		buffer.move_cursor_left(&mut cursor);
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 2, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn move_cursor_left_all_the_way_on_filled_buffer() {
+		let mut buffer = Buffer::with_contents(String::from("abc"));
+		let mut cursor = Cursor::new();
+		cursor.node_offset = 3;
+		cursor.line_offset = 3;
+
+		buffer.move_cursor_left(&mut cursor);
+		buffer.move_cursor_left(&mut cursor);
+		buffer.move_cursor_left(&mut cursor);
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn move_cursor_left_across_newline() {
+		let mut buffer = Buffer::with_contents(String::from("ab\nc"));
+		let mut cursor = Cursor::new();
+		cursor.node_offset = 3;
+		cursor.line_idx = 1;
+		cursor.line_offset = 0;
+
+		buffer.move_cursor_left(&mut cursor);
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 2, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn move_cursor_across_two_nodes_from_middle() {
+		let mut buffer = Buffer::with_contents(String::from("abc"));
+		let mut cursor = Cursor::new();
+
+		buffer.added_str.append(&mut stov("efg"));
+		let added_node = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
+		buffer.node_list.push(added_node);
+
+		cursor.node_idx = 1;
+		cursor.node_offset = 0;
+		cursor.line_idx = 0;
+		cursor.line_offset = 0;
+
+		buffer.move_cursor_left(&mut cursor);
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 3, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn move_cursor_across_two_nodes_from_right() {
+		let mut buffer = Buffer::with_contents(String::from("abc"));
+		let mut cursor = Cursor::new();
+
+		buffer.added_str.append(&mut stov("efg"));
+		let added_node = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
+		buffer.node_list.push(added_node);
+
+		cursor.node_idx = 1;
+		cursor.node_offset = 1;
+		cursor.line_idx = 0;
+		cursor.line_offset = 1;
+
+		buffer.move_cursor_left(&mut cursor);
+		buffer.move_cursor_left(&mut cursor);
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 3, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
+	}
 }
