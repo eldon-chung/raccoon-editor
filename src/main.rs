@@ -71,7 +71,11 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         Event::Input{key: Key::Left, ..} => {
             app.move_cursor_left();
             Ok(QuitOption::NotQuitting)
-        }
+        },
+        Event::Input{key: Key::Ctrl('s'), ..} => {
+            app.save_file();
+            Ok(QuitOption::Quitting)
+        },
         _ => Ok(QuitOption::NotQuitting),
     }
 

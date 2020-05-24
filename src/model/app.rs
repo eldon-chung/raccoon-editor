@@ -1,3 +1,4 @@
+use std::fs;
 use crate::utils::Cursor;
 
 use super::buffer::Buffer;
@@ -15,6 +16,7 @@ pub struct App {
 }
 
 impl App {
+
     pub fn new() -> App {
         App {
             buffer: Buffer::new(),
@@ -54,5 +56,10 @@ impl App {
 
     pub fn move_cursor_right(&mut self) {
         self.buffer.move_cursor_right(&mut self.cursor_main);
+    }
+
+    pub fn save_file(&self) {
+        let text_to_save = self.get_text_as_iter().join("");
+        fs::write("foo.txt", text_to_save).expect("Unable to write file");
     }
 }
