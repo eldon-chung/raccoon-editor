@@ -1,5 +1,12 @@
 language: rust
 
+- name: Codecov
+  uses: codecov/codecov-action@v1.0.7
+
+- name: Coveralls GitHub Action
+  uses: coverallsapp/github-action@v1.1.1
+
+
 before_install:
   - curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-linux-x86_64.tar.bz2 | tar jxf -
 
