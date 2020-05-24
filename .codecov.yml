@@ -21,3 +21,24 @@ comment:
 
 ignore:
   - "**/*_tests.rs"       # wildcards accepted
+
+
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        threshold: 20%
+        base: auto 
+        flags: 
+          - unit
+        paths: 
+          - "src"
+       # advanced
+        branches: 
+          - master
+        if_not_found: success
+        if_ci_failed: error
+        informational: false
+        only_pulls: false
