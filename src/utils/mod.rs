@@ -5,6 +5,7 @@ pub enum QuitOption {
 	NotQuitting,
 }
 
+#[derive(Debug)]
 pub struct Cursor {
 	pub node_idx: usize,
 	pub node_offset: usize,
