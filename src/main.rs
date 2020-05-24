@@ -29,6 +29,11 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
     let mut view = View::new(terminal);
 
+    // Currently, it opens a foo.txt
+    // Should change this to expect a command line argument of the filename
+    // If not filename specified, then it will open a new session
+    app.open_file();
+
     // Loop:
     // get next event from event queue
     // handle next event, update program state

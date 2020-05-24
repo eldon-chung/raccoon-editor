@@ -62,4 +62,13 @@ impl App {
         let text_to_save = self.get_text_as_iter().join("");
         fs::write("foo.txt", text_to_save).expect("Unable to write file");
     }
+
+    pub fn open_file(&mut self) {
+        let data = fs::read_to_string("foo.txt").expect("Unable to read file");
+
+        for c in data.chars() {
+            // This probably adds to the "added" buffer, which we don't want...
+            self.add_char(c);
+        }
+    }
 }
