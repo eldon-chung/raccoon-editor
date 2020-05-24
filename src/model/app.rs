@@ -66,9 +66,6 @@ impl App {
     pub fn open_file(&mut self) {
         let data = fs::read_to_string("foo.txt").expect("Unable to read file");
 
-        for c in data.chars() {
-            // This probably adds to the "added" buffer, which we don't want...
-            self.add_char(c);
-        }
+        self.buffer = Buffer::with_contents(data);
     }
 }
