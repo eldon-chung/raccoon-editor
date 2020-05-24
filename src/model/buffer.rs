@@ -307,7 +307,7 @@ impl Buffer {
                 left_line_offsets.pop();
             }
 
-            let left_node = BufferNode::new
+            let left_node = BufferNode::new(
             					from,
                                 index,
                                 index + cursor.node_offset - 1,
