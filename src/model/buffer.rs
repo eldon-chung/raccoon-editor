@@ -37,6 +37,10 @@ impl BufferNode {
 		self.offset
 	}
 
+	fn reduce_offset_by(&mut self, amount: usize) {
+		self.offset -= amount;
+	}
+
 	fn from(&self) -> BufferType {
 		self.from
 	}
@@ -183,100 +187,117 @@ impl Buffer {
 	}
 
 	pub fn remove(&mut self, cursor: &mut Cursor) {
-		// in general there are two cases, whether the cursor is between
-		// 	two nodes or in the middle of a single node. both cases are handled
-		//  quite differently
 
 		if self.node_list.len() == 0 {
+			// there's nothing to delete
 			return;
 		}
 
 		if cursor.node_idx == 0 && cursor.node_offset == 0 {
+			// cursor is all the way at the front of the buffer
 			return;
 		}
 
-		let mut node_idx = cursor.node_idx;
-		let mut node_offset = cursor.node_offset;
+		let node_idx = cursor.node_idx;
+		let node_offset = cursor.node_offset;
+		if node_offset == 0 {
+			// cursor is in the front of a node
 
-		if node_offset == 0 && node_idx >= 1 {
-			node_idx -= 1;
-			node_offset = self.node_list[node_idx].offset();
-		}
+			// get the node just behind it
+			let node_behind = &mut self.node_list[node_idx - 1];
 
-		let from = self.node_list[node_idx].from();
-		let offset = self.node_list[node_idx].offset();
-		let index = self.node_list[node_idx].index();
-		let line_offsets = &mut self.node_list[node_idx].line_offsets();
-		let mut line_offsets: Vec<usize> = line_offsets.drain(..).collect();
-
-		if node_offset == self.node_list[node_idx].offset() {
-			// just reduce the node offset by 1 here
-			node_offset -= 1;
-			if node_offset == 0 {
-				// node is now empty, just delete it and move the cursor
-				self.node_list.remove(node_idx);
-				cursor.node_offset = 0;
-				cursor.line_idx = 0;
-				cursor.line_offset = 0;
-				return;
+			if node_behind.last_line_offset() == node_behind.offset() {
+				assert!(node_behind.offset() >= 1);
+				// the last character of that node is '\n'
+				node_behind.line_offsets.pop();
 			}
-			let removed_char = match from {
-				BufferType::Original => self.original_str[index + node_offset],
-				BufferType::Added => self.added_str[index + node_offset],
-			};
-			if removed_char == '\n' as u8 {
-				line_offsets.pop();
+
+			node_behind.reduce_offset_by(1);
+
+			if node_behind.offset == 0 {
+				// node is now empty, should remove it from list
+				cursor.node_idx -= 1;
+				self.node_list.remove(cursor.node_idx);
 			}
-			let new_node = BufferNode::new(from, index, node_offset, line_offsets);
-			// in this case the cursor position does not need to be updated?
-			//  unless the cursor was at the end of the entire buffer
-			if node_idx == self.node_list.len() - 1 {
+			// no changes need to be made to the cursor since it should still
+			//	just be referring to the same node
+		} else if node_offset == self.node_list[node_idx].offset() {
+			// cursor is at the end of a node
+			//	should only happen when cursor is at the last node
+			assert_eq!(node_idx, self.node_list.len() - 1);
+
+			let current_node = &mut self.node_list[cursor.node_idx];
+			if current_node.last_line_offset() == cursor.node_offset {
+				// the last character of that node is '\n'
+				current_node.line_offsets.pop();
+			}
+
+			current_node.reduce_offset_by(1);
+
+			if current_node.offset() == 0 {
+				// node is now empty, should remove it from list
+				self.node_list.remove(cursor.node_idx);
+
+				cursor.node_idx = match cursor.node_idx {
+					0 => 0,
+					x => x - 1,
+				};
+
+				if self.node_list.len() == 0 {
+					// no more nodes in the node list
+					return;
+				}
+
+				// cursor should take on values based on previous node
+				let current_node = &self.node_list[cursor.node_idx];
+				cursor.node_offset = current_node.offset();
+				cursor.line_idx = current_node.line_offsets_len() - 1;
+				cursor.line_offset = cursor.node_offset - current_node.last_line_offset();
+			} else {
+				// cursor should take on values based on current node
 				cursor.node_offset -= 1;
+				cursor.line_idx = current_node.line_offsets_len() - 1;
+				cursor.line_idx = current_node.offset() - current_node.last_line_offset();
 			}
-			self.node_list.insert(node_idx, new_node);
-			self.node_list.remove(node_idx + 1);
 		} else {
-			// split the line_offsets based on where the cursor is
-			let drain_from_idx = cursor.line_idx;
-			let mut left_line_offsets: Vec<usize> = line_offsets.drain(..=drain_from_idx).collect();
-			let node_offset = cursor.node_offset;
-			let mut right_line_offsets: Vec<usize> = line_offsets.drain( .. )
-												.map(|x| x - node_offset)
-												.collect();
+			// cursor is in the middle of a node
+			let current_node = &mut self.node_list[cursor.node_idx];
+			let node_from = current_node.from();
+			let node_index = current_node.index();
+			let node_offset = current_node.offset();
+			let node_line_offsets = current_node.line_offsets();
+
+			// split the line offsets into two parts
+			let mut left_line_offsets: Vec<usize> = node_line_offsets.drain(..=cursor.line_idx)
+														.collect();
+			let mut right_line_offsets: Vec<usize> = node_line_offsets.drain( .. )
+														.map(|x| x - node_offset)
+														.collect();
 			right_line_offsets.insert(0, 0);
 
-			let removed_char = match from {
-				BufferType::Original => self.original_str[index + node_offset - 1],
-				BufferType::Added => self.added_str[index + node_offset - 1],
-			};
-			if removed_char == '\n' as u8 {
+			if *left_line_offsets.last().unwrap() == node_offset {
+				// the last character of the left node is '\n'
 				left_line_offsets.pop();
 			}
 
-			// construct the left and right node
-			let left_node = BufferNode::new(from, index, cursor.node_offset - 1, left_line_offsets);
-			let right_node = BufferNode::new(from, index + cursor.node_offset, offset - cursor.node_offset, right_line_offsets);
+			let left_node = BufferNode::new(node_from,
+								node_index,
+								node_index + cursor.node_offset - 1,
+								left_line_offsets);
+			let right_node = BufferNode::new(node_from,
+								node_index + cursor.node_offset,
+								node_offset - cursor.node_offset,
+								right_line_offsets);
 
-			if cursor.node_offset - 1 == 0 {
-				// the left node is empty, we just need to insert the right node
-				self.node_list.insert(node_idx, right_node);
-				self.node_list.remove(node_idx + 1);
+			self.node_list.insert(cursor.node_idx, left_node);
+			self.node_list.insert(cursor.node_idx + 1, right_node);
+			self.node_list.remove(cursor.node_idx + 2);
 
-				cursor.node_offset = 0;
-				cursor.line_idx = 0;
-				cursor.line_offset = 0;
-			} else {
-				self.node_list.insert(node_idx, left_node);
-				self.node_list.insert(node_idx + 1, right_node);
-				self.node_list.remove(node_idx + 2);
-
-				cursor.node_idx += 1;
-				cursor.node_offset = 0;
-				cursor.line_idx = 0;
-				cursor.line_offset = 0;
-			}
+			cursor.node_idx += 2;
+			cursor.node_offset = 0;
+			cursor.line_idx = 0;
+			cursor.line_offset = 0;
 		}
-
 	}
 
 	pub fn remove_word(&mut self, cursor: &mut Cursor) -> char {

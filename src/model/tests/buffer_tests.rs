@@ -193,6 +193,25 @@ mod buffer_tests {
 	}
 
 	#[test]
+	fn remove_single_char_from_buffer() {
+		let mut cursor = Cursor::new();
+		let mut buffer = Buffer::with_contents(String::from("a"));
+		cursor.node_offset = 1;
+		println!("{:?}", buffer.node_list);
+		buffer.remove(&mut cursor);
+
+		assert_eq!(buffer.original_str, stov("a"), "original_str mismatch");
+		assert_eq!(buffer.added_str, stov(""), "added_str mismatch");
+
+		assert_eq!(buffer.node_list, vec![], "node_list mismatch");
+
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
+	}
+
+	#[test]
 	fn remove_left_from_node() {
 		let mut cursor = Cursor::new();
 		let mut buffer = Buffer::with_contents(String::from("abc"));
@@ -267,7 +286,7 @@ mod buffer_tests {
 		let node_0 = BufferNode::new(BufferType::Original, 2, 1, vec![0]);
 		assert_eq!(buffer.node_list, vec![node_0], "node_list mismatch");
 
-		assert_eq!(cursor.node_idx, 1, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
 		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
 		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
 		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
@@ -320,6 +339,33 @@ mod buffer_tests {
 		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
 		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
 		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
+	}
+
+	#[test]
+	fn insert_4_then_remove_5() {
+		let mut cursor = Cursor::new();
+		let mut buffer = Buffer::new();
+
+		buffer.insert(&mut cursor, 'a');
+		buffer.insert(&mut cursor, 'b');
+		buffer.insert(&mut cursor, 'c');
+		buffer.insert(&mut cursor, 'd');
+		buffer.remove(&mut cursor);
+		buffer.remove(&mut cursor);
+		buffer.remove(&mut cursor);
+		buffer.remove(&mut cursor);
+		//buffer.remove(&mut cursor);
+
+
+		assert_eq!(buffer.original_str, stov(""), "original_str mismatch");
+		assert_eq!(buffer.added_str, stov("abcd"), "original_str mismatch");
+
+		assert_eq!(buffer.node_list, Vec::new(), "node_list mismatch");
+
+		assert_eq!(cursor.node_idx, 1, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
+		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+		assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
 	}
 
 	#[test]
