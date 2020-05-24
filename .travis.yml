@@ -21,7 +21,7 @@ script:
         zip -0 ccov.zip `find . \( -name "raccoon_editor*.gc*" \) -print`;
         ./grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore "/*" -o lcov.info;
         bash <(curl -s https://codecov.io/bash) -f lcov.info;
-        ./grcov ./target/debug -t coveralls -s . --ignore-not-existing --ignore "/*" --token jRSZlEVjkIYpYEeBNX1zDeEamjdfQxkw4 > coveralls.json;
+        ./grcov ccov.zip -s . -t coveralls --branch --ignore-not-existing --ignore "/*" --token jRSZlEVjkIYpYEeBNX1zDeEamjdfQxkw4 > coveralls.json;
         curl -S -F json_file=@coveralls.json https://coveralls.io/api/v1/jobs;
       fi
     - |
