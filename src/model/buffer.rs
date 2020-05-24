@@ -245,6 +245,10 @@ impl Buffer {
 
 				if self.node_list.len() == 0 {
 					// no more nodes in the node list
+					cursor.node_idx = 0;
+					cursor.node_offset = 0;
+					cursor.line_idx = 0;
+					cursor.line_offset = 0;
 					return;
 				}
 
@@ -257,43 +261,43 @@ impl Buffer {
 				// cursor should take on values based on current node
 				cursor.node_offset -= 1;
 				cursor.line_idx = current_node.line_offsets_len() - 1;
-				cursor.line_idx = current_node.offset() - current_node.last_line_offset();
+				cursor.line_offset = current_node.offset() - current_node.last_line_offset();
 			}
 		} else {
 			// cursor is in the middle of a node
 			let current_node = &mut self.node_list[cursor.node_idx];
-			let node_from = current_node.from();
-			let node_index = current_node.index();
-			let node_offset = current_node.offset();
-			let node_line_offsets = current_node.line_offsets();
+			let from = current_node.from();
+			let index = current_node.index();
+			let offset = current_node.offset();
+			let line_offsets = current_node.line_offsets();
 
 			// split the line offsets into two parts
-			let mut left_line_offsets: Vec<usize> = node_line_offsets.drain(..=cursor.line_idx)
+			let mut left_line_offsets: Vec<usize> = line_offsets.drain(..=cursor.line_idx)
 														.collect();
-			let mut right_line_offsets: Vec<usize> = node_line_offsets.drain( .. )
-														.map(|x| x - node_offset)
+			let mut right_line_offsets: Vec<usize> = line_offsets.drain( .. )
+														.map(|x| x - cursor.node_offset)
 														.collect();
 			right_line_offsets.insert(0, 0);
 
-			if *left_line_offsets.last().unwrap() == node_offset {
+			if *left_line_offsets.last().unwrap() == cursor.node_offset {
 				// the last character of the left node is '\n'
 				left_line_offsets.pop();
 			}
 
-			let left_node = BufferNode::new(node_from,
-								node_index,
-								node_index + cursor.node_offset - 1,
+			let left_node = BufferNode::new(from,
+								index,
+								index + cursor.node_offset - 1,
 								left_line_offsets);
-			let right_node = BufferNode::new(node_from,
-								node_index + cursor.node_offset,
-								node_offset - cursor.node_offset,
+			let right_node = BufferNode::new(from,
+								index + cursor.node_offset,
+								offset - cursor.node_offset,
 								right_line_offsets);
 
 			self.node_list.insert(cursor.node_idx, left_node);
 			self.node_list.insert(cursor.node_idx + 1, right_node);
 			self.node_list.remove(cursor.node_idx + 2);
 
-			cursor.node_idx += 2;
+			cursor.node_idx += 1;
 			cursor.node_offset = 0;
 			cursor.line_idx = 0;
 			cursor.line_offset = 0;

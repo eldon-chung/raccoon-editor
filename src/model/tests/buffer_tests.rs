@@ -197,7 +197,8 @@ mod buffer_tests {
 		let mut cursor = Cursor::new();
 		let mut buffer = Buffer::with_contents(String::from("a"));
 		cursor.node_offset = 1;
-		println!("{:?}", buffer.node_list);
+		cursor.line_offset = 1;
+
 		buffer.remove(&mut cursor);
 
 		assert_eq!(buffer.original_str, stov("a"), "original_str mismatch");
@@ -234,6 +235,8 @@ mod buffer_tests {
 	fn remove_from_last_of_node() {
 		let mut cursor = Cursor::new();
 		cursor.node_offset = 3;
+		cursor.line_offset = 3;
+
 		let mut buffer = Buffer::with_contents(String::from("abc"));
 
 		buffer.remove(&mut cursor);
@@ -247,13 +250,14 @@ mod buffer_tests {
 		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
 		assert_eq!(cursor.node_offset, 2, "cursor.node_offset mismatch");
 		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
-		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
+		assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
 	}
 
 	#[test]
 	fn remove_from_mid_of_node() {
 		let mut cursor = Cursor::new();
 		cursor.node_offset = 2;
+		cursor.line_offset = 2;
 		let mut buffer = Buffer::with_contents(String::from("abc"));
 
 		buffer.remove(&mut cursor);
@@ -354,7 +358,7 @@ mod buffer_tests {
 		buffer.remove(&mut cursor);
 		buffer.remove(&mut cursor);
 		buffer.remove(&mut cursor);
-		//buffer.remove(&mut cursor);
+		buffer.remove(&mut cursor);
 
 
 		assert_eq!(buffer.original_str, stov(""), "original_str mismatch");
@@ -362,10 +366,10 @@ mod buffer_tests {
 
 		assert_eq!(buffer.node_list, Vec::new(), "node_list mismatch");
 
-		assert_eq!(cursor.node_idx, 1, "cursor.node_idx mismatch");
-		assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
+		assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
+		assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
 		assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
-		assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
+		assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
 	}
 
 	#[test]
