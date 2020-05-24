@@ -20,4 +20,4 @@ comment:
   require_changes: no
 
 ignore:
-  - "*_tests.rs"       # wildcards accepted
+  - "**/*_tests.rs"       # wildcards accepted
