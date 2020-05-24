@@ -385,7 +385,7 @@ impl Buffer {
 
             let current_node: &BufferNode = &self.node_list[cursor.node_idx];
 
-            if cursor.node_offset + 1 == current_node.line_offset_at(cursor.line_idx) {
+            if cursor.line_offset == 0 {
                 // cursor should have moved over a '\n'
                 //	reduce the line index by 1, and update the line offset
                 cursor.line_idx -= 1;
@@ -399,48 +399,57 @@ impl Buffer {
     }
 
     pub fn move_cursor_right(&self, cursor: &mut Cursor) {
-        if cursor.node_offset == self.node_list[cursor.node_idx].offset() {
-            assert_eq!(cursor.node_idx, self.node_list.len() - 1);
-            return;
+    	if self.node_list.len() == 0 {
+    		// node_list should be empty and thus there is nothing to do
+    		//	so just return
+    		return;
+    	}
+        if cursor.node_idx == self.node_list.len() - 1
+        	&& cursor.node_offset == self.node_list.last().unwrap().offset() {
+        		// cursor should be pointing at the last position in the buffer
+        		//	so there should be nothing to do but return
+        		return;
         }
 
-        let current_node: &BufferNode = &self.node_list[cursor.node_idx];
-        if cursor.node_idx == self.node_list.len() - 1 {
-            cursor.node_offset += 1;
+        if cursor.node_offset + 1 == self.node_list.last().unwrap().offset() {
+        	// cursor should be at second last position of the current node
+        	if cursor.node_idx == self.node_list.len() - 1 {
+        		// cursor should be on the last node in the list
+        		//	so just increment the node_offset and line_offset
+        		cursor.node_offset += 1;
+        		let current_node = &self.node_list[cursor.node_idx];
+        		if cursor.node_offset == current_node.last_line_offset() {
+        			// cursor should have passed over a '\n'
+        			cursor.line_idx += 1;
+        			cursor.line_offset = 0;
+        		} else {
+        			// cursor should have passed over something else
+        			cursor.line_offset += 1;
+        		}
+        	} else {
+        		// cursor should have a node on the right
+        		//	point the cursor to the beginning of that node
+	        	cursor.node_idx += 1;
+	        	cursor.node_offset = 0;
+	        	cursor.line_idx = 0;
+	        	cursor.line_offset = 0;
+        	}
 
-            let index = current_node.index();
-            let last_char = match current_node.from() {
-                BufferType::Original => self.original_str[index + cursor.node_offset],
-                BufferType::Added => self.added_str[index + cursor.node_offset],
-            };
-
-            if last_char == '\n' as u8 {
-                cursor.line_idx += 1;
-                cursor.line_offset = 0;
-            } else {
-                cursor.line_offset += 1;
-            }
-            return;
-        }
-
-        if cursor.node_offset + 1 == current_node.offset() {
-            cursor.node_idx += 1;
-            cursor.node_offset = 0;
-            cursor.line_idx = 0;
-            cursor.line_offset = 0;
         } else {
-            cursor.node_offset += 1;
-            let index = current_node.index();
-            let last_char = match current_node.from() {
-                BufferType::Original => self.original_str[index + cursor.node_offset],
-                BufferType::Added => self.added_str[index + cursor.node_offset],
-            };
-            if last_char == '\n' as u8 {
-                cursor.line_idx += 1;
-                cursor.line_offset = 0;
-            } else {
-                cursor.line_offset += 1;
-            }
+        	// cursor should be still within the same node
+        	//	increase the node_offset by 1
+        	//	update the line index based on whether it has crossed
+        	cursor.node_offset += 1;
+        	let current_node = &self.node_list[cursor.node_idx];
+        	if cursor.node_idx < current_node.line_offsets_len() - 1
+        		&&	cursor.node_offset
+        			== current_node.line_offset_at(cursor.line_idx + 1) {
+        		//	cursor shoulve have just passed over a '\n'
+        		cursor.line_idx += 1;
+        		cursor.line_offset = 0;
+        	} else {
+        		cursor.line_offset += 1;
+        	}
         }
     }
 
