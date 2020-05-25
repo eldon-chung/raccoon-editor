@@ -28,9 +28,8 @@ jobs:
           git config --local user.email "poochymin@gmail.com"
           git config --local user.name "poochymin-bot"
           git commit -m "Format code" -a
-      - name: If attempting to commit works
+      - name: Push changes, if attempting to commit works
         if: ${{ success() }}
-      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
