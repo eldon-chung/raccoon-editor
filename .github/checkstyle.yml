@@ -1,12 +1,13 @@
-on: [pull_request]
+on: [push, pull_request] 
 
 
 jobs:
   build:
+    name: Run rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
     - name: Create local changes
+    - uses: actions/checkout@master
       run: |
         cargo fmt
     - name: Commit files
