@@ -21,16 +21,13 @@ jobs:
         run: |
           git checkout ${{ steps.vars.outputs.short_ref }}
           cargo fmt
-      
+
       - name: Capture output
         id: get_status
         run: |
           OUTPUT=$(git status --porcelain)
           echo "##[set-output name=status;]$OUTPUT"
-      - name: Debug, print what "status" is bound to
-        id: debug_step
-        run : echo ${{ steps.get_status.outputs.status }}
-      - name: Commit files
+           - name: Commit files
         if: ${{ steps.get_status.outputs.status != '' }}
         run: |
           git config --local user.email "poochymin@gmail.com"
@@ -42,6 +39,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.vars.outputs.short_ref }}
-      - name: Else just return gracefully?
-        if: ${{ failure() }}
-        run: echo "nothing to do"
