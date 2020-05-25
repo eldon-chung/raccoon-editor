@@ -77,8 +77,7 @@ impl Buffer {
         // Whelp this looks gross. Probably prettify or rewrite later on
         let acc = vec![0];
         let index_list: Vec<usize> = (1..=string.len()).collect();
-        string
-            .chars()
+        string.chars()
             .zip(index_list.iter())
             .filter(|(c, _)| *c == '\n')
             .fold(acc, |mut list, (c, idx)| {
