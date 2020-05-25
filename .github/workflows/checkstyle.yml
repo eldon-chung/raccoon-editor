@@ -33,6 +33,7 @@ jobs:
           git config --local user.name "poochymin-bot"
           git commit -m "Format code" -a
       - name: Push changes, if attempting to commit works
+        if: ${{ steps.check.output.changes != '' }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
