@@ -27,7 +27,7 @@ jobs:
         run: echo "::set-output name=status::(git status --porcelain)"
       - name: Debug, print what "status" is bound to
         id: debug_step
-        run : echo ${{ steps.get_status.output.status != '' }}
+        run : echo ${{ steps.get_status.output.status }}
       - name: Commit files
         if: ${{ steps.get_status.output.status != '' }}
         run: |
