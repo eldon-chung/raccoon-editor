@@ -6,8 +6,8 @@ jobs:
     name: Run rustfmt
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
       - name: Create local changes
-        uses: actions/checkout@master
         run: |
           cargo fmt
       - name: Commit files
