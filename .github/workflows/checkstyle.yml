@@ -29,15 +29,15 @@ jobs:
           echo "##[set-output name=status;]$OUTPUT"
       - name: Debug, print what "status" is bound to
         id: debug_step
-        run : echo ${{ steps.get_status.output.status }}
+        run : echo ${{ steps.get_status.outputs.status }}
       - name: Commit files
-        if: ${{ steps.get_status.output.status != '' }}
+        if: ${{ steps.get_status.outputs.status != '' }}
         run: |
           git config --local user.email "poochymin@gmail.com"
           git config --local user.name "poochymin-bot"
           git commit -m "Format code" -a
       - name: Push changes, if attempting to commit works
-        if: ${{ steps.get_status.output.status != '' }}
+        if: ${{ steps.get_status.outputs.status != '' }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
