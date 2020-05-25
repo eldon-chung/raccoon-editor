@@ -9,7 +9,7 @@ use crate::utils::events::{Event, Events};
 use crate::utils::QuitOption;
 
 mod model;
-use crate::model::app::App;
+use crate::model::app::{App, AppMode, CommandMode};
 
 mod view;
 use crate::view::View;
@@ -51,6 +51,8 @@ fn main() -> Result<(), io::Error> {
 }
 
 fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
+    const WRITE: bool = true;
+    const READ: bool= false;
     match event {
         // Full list of keys can be found at
         // https://docs.rs/termion/1.1.1/termion/event/enum.Key.html
@@ -86,7 +88,8 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('s'),
             ..
         } => {
-            app.save_file();
+            //app.save_file();
+            app.set_app_mode(AppMode::Command(WRITE));
             Ok(QuitOption::Quitting)
         }
         Event::Input {
@@ -96,7 +99,8 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             // Currently, it opens a foo.txt
             // However, should change this to upon pressing,
             // user gets a prompt that will ask them to enter filename
-            app.open_file();
+            // app.open_file();
+            app.set_app_mode(AppMode::Command(READ));
             Ok(QuitOption::NotQuitting)
         }
         _ => Ok(QuitOption::NotQuitting),

@@ -7,7 +7,15 @@ use std::fs;
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {
     Edit,
-    Command,
+    // IMPORTANT: Change boolean to hold an enum in the future
+    // Having difficulties with the traits
+    // Write = true, Read = false
+    Command(bool),
+}
+
+pub enum CommandMode {
+    Read, // opening a file
+    Write, // saving a file
 }
 
 pub struct App {
@@ -47,21 +55,21 @@ impl App {
     pub fn get_text_as_iter(&self) -> Vec<String> {
         match self.app_mode() {
             AppMode::Edit => vec![self.buffer.as_str()],
-            AppMode::Command => vec![self.command_buffer.as_str()],
+            AppMode::Command(cm) => vec![self.command_buffer.as_str()],
         }
     }
 
     pub fn add_char(&mut self, c: char) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.insert(&mut self.cursor_main, c),
-            AppMode::Command => self.command_buffer.insert(&mut self.cursor_main, c),
+            AppMode::Command(cm) => self.command_buffer.insert(&mut self.cursor_main, c),
         }
     }
 
     pub fn remove_char(&mut self) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.remove(&mut self.cursor_main),
-            AppMode::Command => self.command_buffer.remove(&mut self.cursor_main),
+            AppMode::Command(cm) => self.command_buffer.remove(&mut self.cursor_main),
         }
         
     }
@@ -69,14 +77,14 @@ impl App {
     pub fn move_cursor_left(&mut self) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.move_cursor_left(&mut self.cursor_main),
-            AppMode::Command => self.command_buffer.move_cursor_left(&mut self.cursor_main),
+            AppMode::Command(cm) => self.command_buffer.move_cursor_left(&mut self.cursor_main),
         }
     }
 
     pub fn move_cursor_right(&mut self) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.move_cursor_right(&mut self.cursor_main),
-            AppMode::Command => self.command_buffer.move_cursor_right(&mut self.cursor_main),
+            AppMode::Command(cm) => self.command_buffer.move_cursor_right(&mut self.cursor_main),
         }
     }
 
