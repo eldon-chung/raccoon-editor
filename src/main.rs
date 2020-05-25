@@ -108,6 +108,10 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
                     app.save_file();
                     Ok(QuitOption::Quitting)
                 }
+                AppMode::Command(READ) => {
+                    app.open_file();
+                    Ok(QuitOption::NotQuitting)
+                }
                 _ => {
                     Ok(QuitOption::NotQuitting)
                 }

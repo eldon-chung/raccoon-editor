@@ -100,8 +100,14 @@ impl App {
     }
 
     pub fn open_file(&mut self) {
-        let data = fs::read_to_string("foo.txt").expect("Unable to read file");
+        // Get from the command_buffer
+        let filename = self.get_text_as_iter().join("");
 
+        // Get contents from file, and initialise buffer with those contents
+        let data = fs::read_to_string(filename).expect("Unable to read file");
         self.buffer = Buffer::with_contents(data);
+
+        // Enter editing mode after this
+        self.set_app_mode(AppMode::Edit);
     }
 }
