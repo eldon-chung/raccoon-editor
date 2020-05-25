@@ -1,0 +1,41 @@
+name: Rust Formatter
+on: [push]
+
+jobs:
+  build:
+    name: Run rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        if: ${{ github.event.pusher.name != 'poochymin-bot' }}
+
+      - name: Echo the current push author
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
+      - name: Check output
+        run: echo ${{ steps.vars.outputs.short_ref }}
+
+      - name: Create local changes
+        run: |
+          git checkout ${{ steps.vars.outputs.short_ref }}
+          cargo fmt
+      
+      - name: Capture output
+        id: get_status
+        run: |
+          OUTPUT=$(git status --porcelain)
+          echo "##[set-output name=status;]$OUTPUT"
+      - name: Commit files
+        if: ${{ steps.get_status.outputs.status != '' }}
+        run: |
+          git config --local user.email "poochymin@gmail.com"
+          git config --local user.name "poochymin-bot"
+          git commit -m "Format code" -a
+      - name: Push changes, if attempting to commit works
+        if: ${{ steps.get_status.outputs.status != '' }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.vars.outputs.short_ref }}
