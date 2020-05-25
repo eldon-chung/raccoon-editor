@@ -1,0 +1,24 @@
+- name: GitHub Push
+  uses: ad-m/github-push-action@v0.5.0
+
+on: pull_request
+
+
+jobs:
+  run-rustfmt:
+    name: rn rustfmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Run cargo fmt
+      run: |
+        cargo fmt
+    - name: Commit files
+      run: |
+        git config --local user.email "eldon.chung@github.com"
+        git config --local user.name "eldon-chung"
+        git commit -m "Format source code" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}    echo $MY_VAR $FIRST_NAME $MIDDLE_NAME $LAST_NAME.
