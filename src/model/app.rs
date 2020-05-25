@@ -2,6 +2,8 @@ use crate::utils::Cursor;
 
 use super::buffer::Buffer;
 
+use std::fs;
+
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {
     Edit,

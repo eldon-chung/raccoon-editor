@@ -81,18 +81,24 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         Event::Input { key: Key::Left, .. } => {
             app.move_cursor_left();
             Ok(QuitOption::NotQuitting)
-        },
-        Event::Input{key: Key::Ctrl('s'), ..} => {
+        }
+        Event::Input {
+            key: Key::Ctrl('s'),
+            ..
+        } => {
             app.save_file();
             Ok(QuitOption::Quitting)
-        },
-        Event::Input{key: Key::Ctrl('o'), ..} => {
+        }
+        Event::Input {
+            key: Key::Ctrl('o'),
+            ..
+        } => {
             // Currently, it opens a foo.txt
             // However, should change this to upon pressing,
             // user gets a prompt that will ask them to enter filename
             app.open_file();
             Ok(QuitOption::NotQuitting)
-        },
+        }
         _ => Ok(QuitOption::NotQuitting),
     }
 }
