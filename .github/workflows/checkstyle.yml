@@ -7,15 +7,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Create local changes
-        run: |
-          cargo fmt
-      - name: Commit files
-        run: |
-          git config --local user.email "eldon-chung@github.com"
-          git config --local user.name "eldon-chung"
-          git commit -m "Add changes" -a
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
+      - name: Check output
+        run: echo ${{ steps.vars.outputs.short_ref }}
+
+      #- name: Create local changes
+      #  run: |
+      #    cargo fmt
+      #- name: Commit files
+      #  run: |
+      #    git config --local user.email "eldon-chung@github.com"
+      #    git config --local user.name "eldon-chung"
+      #    git commit -m "Add changes" -a
+      #- name: Push changes
+      #  uses: ad-m/github-push-action@master
+      #  with:
+      #    github_token: ${{ secrets.GITHUB_TOKEN }}
