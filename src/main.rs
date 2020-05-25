@@ -1,8 +1,8 @@
 use std::io;
-use tui::Terminal;
-use tui::backend::TermionBackend;
-use termion::raw::IntoRawMode;
 use termion::event::Key;
+use termion::raw::IntoRawMode;
+use tui::backend::TermionBackend;
+use tui::Terminal;
 
 mod utils;
 use crate::utils::events::{Event, Events};
@@ -42,7 +42,7 @@ fn main() -> Result<(), io::Error> {
 
         match handle_event(event, &mut app) {
             Ok(QuitOption::Quitting) => break,
-            Ok(QuitOption::NotQuitting) => {},
+            Ok(QuitOption::NotQuitting) => {}
             Err(x) => panic!("{:?}", x),
         };
     }
@@ -54,21 +54,31 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
     match event {
         // Full list of keys can be found at
         // https://docs.rs/termion/1.1.1/termion/event/enum.Key.html
-        Event::Tick{..} => Ok(QuitOption::NotQuitting),
-        Event::Input{key: Key::Char('q'), ..} => Ok(QuitOption::Quitting),
-        Event::Input{key: Key::Char(c), ..} => {
+        Event::Tick { .. } => Ok(QuitOption::NotQuitting),
+        Event::Input {
+            key: Key::Char('q'),
+            ..
+        } => Ok(QuitOption::Quitting),
+        Event::Input {
+            key: Key::Char(c), ..
+        } => {
             app.add_char(c);
             Ok(QuitOption::NotQuitting)
-        },
-        Event::Input{key: Key::Backspace, ..} => {
+        }
+        Event::Input {
+            key: Key::Backspace,
+            ..
+        } => {
             app.remove_char();
             Ok(QuitOption::NotQuitting)
-        },
-        Event::Input{key: Key::Right, ..} => {
+        }
+        Event::Input {
+            key: Key::Right, ..
+        } => {
             app.move_cursor_right();
             Ok(QuitOption::NotQuitting)
-        },
-        Event::Input{key: Key::Left, ..} => {
+        }
+        Event::Input { key: Key::Left, .. } => {
             app.move_cursor_left();
             Ok(QuitOption::NotQuitting)
         },
@@ -85,6 +95,4 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         },
         _ => Ok(QuitOption::NotQuitting),
     }
-
 }
-

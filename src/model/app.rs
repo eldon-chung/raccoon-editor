@@ -1,4 +1,3 @@
-use std::fs;
 use crate::utils::Cursor;
 
 use super::buffer::Buffer;
@@ -16,7 +15,6 @@ pub struct App {
 }
 
 impl App {
-
     pub fn new() -> App {
         App {
             buffer: Buffer::new(),
