@@ -21,13 +21,18 @@ jobs:
         run: |
           git checkout ${{ steps.vars.outputs.short_ref }}
           cargo fmt
+
+      - name: Check if changes were made
+        id: check
+        run: |
+          echo "##[set-output name=changes;]$(git status --porcelain)"
       - name: Commit files
+        if: ${{ steps.check.output.changes != '' }}
         run: |
           git config --local user.email "poochymin@gmail.com"
           git config --local user.name "poochymin-bot"
           git commit -m "Format code" -a
       - name: Push changes, if attempting to commit works
-        if: ${{ success() }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
