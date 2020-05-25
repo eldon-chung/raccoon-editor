@@ -88,9 +88,15 @@ impl App {
         }
     }
 
-    pub fn save_file(&self) {
+    pub fn save_file(&mut self) {
+        // Get from the command_buffer
+        let filename = self.get_text_as_iter().join("");
+
+        // Get from the normal buffer
+        self.set_app_mode(AppMode::Edit);
         let text_to_save = self.get_text_as_iter().join("");
-        fs::write("foo.txt", text_to_save).expect("Unable to write file");
+
+        fs::write(filename, text_to_save).expect("Unable to write file");
     }
 
     pub fn open_file(&mut self) {

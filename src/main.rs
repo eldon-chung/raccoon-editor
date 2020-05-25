@@ -88,21 +88,32 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('s'),
             ..
         } => {
-            //app.save_file();
             app.set_app_mode(AppMode::Command(WRITE));
-            Ok(QuitOption::Quitting)
+            Ok(QuitOption::NotQuitting)
         }
         Event::Input {
             key: Key::Ctrl('o'),
             ..
         } => {
-            // Currently, it opens a foo.txt
-            // However, should change this to upon pressing,
-            // user gets a prompt that will ask them to enter filename
-            // app.open_file();
             app.set_app_mode(AppMode::Command(READ));
             Ok(QuitOption::NotQuitting)
         }
-        _ => Ok(QuitOption::NotQuitting),
+        Event::Input {
+            // change this
+            key: Key::Ctrl('n'),
+            ..
+        } => {
+            match app.app_mode() {
+                AppMode::Command(WRITE) => {
+                    app.save_file();
+                    Ok(QuitOption::Quitting)
+                }
+                _ => {
+                    Ok(QuitOption::NotQuitting)
+                }
+            }
+        }
+        _ => Ok(QuitOption::NotQuitting)
+
     }
 }
