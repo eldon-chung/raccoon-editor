@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create local changes
-      - uses: actions/checkout@master
+        uses: actions/checkout@master
         run: |
           cargo fmt
       - name: Commit files
