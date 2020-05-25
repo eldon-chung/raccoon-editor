@@ -8,11 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: actions/checkout@v2
+        if: ${{ github.event.pusher.name != 'poochymin-bot' }}
 
-      - name: If push author is not the bot
-        if: ${{ github.event.pusher.name != 'poochymin-bot' }} != # what's the name
-
-      - name: Set output
+      - name: Echo the current push author
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
