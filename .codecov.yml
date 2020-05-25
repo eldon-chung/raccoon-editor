@@ -43,14 +43,16 @@ coverage:
         informational: false
         only_pulls: false
 
+coverage:
+  status:
     patch:
       default:
         # basic
-        target: 0%
-        threshold: 20%
-        base: auto
+        target: 10%
+        threshold: 0%
+        base: auto 
         # advanced
-        branches:
+        branches: 
           - master
         if_no_uploads: error
         if_not_found: success
