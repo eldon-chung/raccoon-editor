@@ -29,11 +29,6 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
     let mut view = View::new(terminal);
 
-    // Currently, it opens a foo.txt
-    // Should change this to expect a command line argument of the filename
-    // If not filename specified, then it will open a new session
-    app.open_file();
-
     // Loop:
     // get next event from event queue
     // handle next event, update program state
@@ -80,6 +75,13 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         Event::Input{key: Key::Ctrl('s'), ..} => {
             app.save_file();
             Ok(QuitOption::Quitting)
+        },
+        Event::Input{key: Key::Ctrl('o'), ..} => {
+            // Currently, it opens a foo.txt
+            // However, should change this to upon pressing,
+            // user gets a prompt that will ask them to enter filename
+            app.open_file();
+            Ok(QuitOption::NotQuitting)
         },
         _ => Ok(QuitOption::NotQuitting),
     }
