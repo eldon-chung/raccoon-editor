@@ -24,7 +24,9 @@ jobs:
       
       - name: Capture output
         id: get_status
-        run: echo "::set-output name=status::(git status --porcelain)"
+        run: |
+          OUTPUT=$(git status --porcelain)
+          echo "##[set-output name=status;]$OUTPUT"
       - name: Debug, print what "status" is bound to
         id: debug_step
         run : echo ${{ steps.get_status.output.status }}
