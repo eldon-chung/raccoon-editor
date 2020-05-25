@@ -23,13 +23,13 @@ impl<B: Backend> View<B> {
 
     pub fn update_display(&mut self, app: &App) -> Result<(), io::Error> {
         let text = app.get_text_as_iter(); // Get a copy of the text to be rendered
-                                        // For now let's not do anything fancy formatting
+                                           // For now let's not do anything fancy formatting
         let text: Vec<_> = text.iter().map(|x| Text::raw(x)).collect();
 
         let title = match app.app_mode() {
             AppMode::Command(true) => "Command mode: Saving into file",
             AppMode::Command(false) => "Command mode: Opening a file",
-            AppMode::Edit => "Edit mode"
+            AppMode::Edit => "Edit mode",
         };
 
         self.terminal.draw(|mut f| {

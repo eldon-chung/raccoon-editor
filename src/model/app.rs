@@ -14,7 +14,7 @@ pub enum AppMode {
 }
 
 pub enum CommandMode {
-    Read, // opening a file
+    Read,  // opening a file
     Write, // saving a file
 }
 
@@ -71,7 +71,6 @@ impl App {
             AppMode::Edit => self.buffer.remove(&mut self.cursor_main),
             AppMode::Command(cm) => self.command_buffer.remove(&mut self.cursor_main),
         }
-        
     }
 
     pub fn move_cursor_left(&mut self) {

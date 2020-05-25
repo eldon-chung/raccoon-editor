@@ -52,7 +52,7 @@ fn main() -> Result<(), io::Error> {
 
 fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
     const WRITE: bool = true;
-    const READ: bool= false;
+    const READ: bool = false;
     match event {
         // Full list of keys can be found at
         // https://docs.rs/termion/1.1.1/termion/event/enum.Key.html
@@ -102,22 +102,17 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             // change this
             key: Key::Ctrl('n'),
             ..
-        } => {
-            match app.app_mode() {
-                AppMode::Command(WRITE) => {
-                    app.save_file();
-                    Ok(QuitOption::Quitting)
-                }
-                AppMode::Command(READ) => {
-                    app.open_file();
-                    Ok(QuitOption::NotQuitting)
-                }
-                _ => {
-                    Ok(QuitOption::NotQuitting)
-                }
+        } => match app.app_mode() {
+            AppMode::Command(WRITE) => {
+                app.save_file();
+                Ok(QuitOption::Quitting)
             }
-        }
-        _ => Ok(QuitOption::NotQuitting)
-
+            AppMode::Command(READ) => {
+                app.open_file();
+                Ok(QuitOption::NotQuitting)
+            }
+            _ => Ok(QuitOption::NotQuitting),
+        },
+        _ => Ok(QuitOption::NotQuitting),
     }
 }
