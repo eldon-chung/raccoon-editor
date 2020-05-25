@@ -171,17 +171,17 @@ impl Buffer {
 
             // construct left and right nodes
             let left_node = BufferNode::new(
-            					from,
-            					index,
-            					cursor.node_offset,
-            					left_line_offsets
-            				);
+                                from,
+                                index,
+                                cursor.node_offset,
+                                left_line_offsets
+                            );
             let right_node = BufferNode::new(
-            					from,
-            					index + cursor.node_offset,
-            					offset - cursor.node_offset,
-            					right_line_offsets
-            				);
+                                from,
+                                index + cursor.node_offset,
+                                offset - cursor.node_offset,
+                                right_line_offsets
+                            );
 
             // add the left, mid, right nodes in in that order to the list
             //  then remove the node that was split into those three
@@ -308,13 +308,13 @@ impl Buffer {
             }
 
             let left_node = BufferNode::new(
-            					from,
+                                from,
                                 index,
                                 index + cursor.node_offset - 1,
                                 left_line_offsets
                             );
             let right_node = BufferNode::new(
-            					from,
+                                from,
                                 index + cursor.node_offset,
                                 offset - cursor.node_offset,
                                 right_line_offsets
@@ -388,13 +388,13 @@ impl Buffer {
                 cursor.line_idx = current_node.line_offsets_len() - 2;
                 cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
             } else {
-            	// the last character of current node should not '\n'
-            	//	so the cursor should point at the last line
-            	cursor.line_idx = current_node.line_offsets_len() - 1;
+                // the last character of current node should not '\n'
+                //	so the cursor should point at the last line
+                cursor.line_idx = current_node.line_offsets_len() - 1;
                 cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
             }
         } else {
-        	// cursor is not at the beginning of the node
+            // cursor is not at the beginning of the node
             cursor.node_offset -= 1;
 
             let current_node: &BufferNode = &self.node_list[cursor.node_idx];
@@ -405,65 +405,65 @@ impl Buffer {
                 cursor.line_idx -= 1;
                 cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
             } else {
-            	// the last character of current node should not be '\n'
-            	//	reduce the line offset by 1
+                // the last character of current node should not be '\n'
+                //	reduce the line offset by 1
                 cursor.line_offset -= 1;
             }
         }
     }
 
     pub fn move_cursor_right(&self, cursor: &mut Cursor) {
-    	if self.node_list.len() == 0 {
-    		// node_list should be empty and thus there is nothing to do
-    		//	so just return
-    		return;
-    	}
+        if self.node_list.len() == 0 {
+            // node_list should be empty and thus there is nothing to do
+            //	so just return
+            return;
+        }
         if cursor.node_idx == self.node_list.len() - 1
-        	&& cursor.node_offset == self.node_list.last().unwrap().offset() {
-        		// cursor should be pointing at the last position in the buffer
-        		//	so there should be nothing to do but return
-        		return;
+            && cursor.node_offset == self.node_list.last().unwrap().offset() {
+                // cursor should be pointing at the last position in the buffer
+                //	so there should be nothing to do but return
+                return;
         }
 
         if cursor.node_offset + 1 == self.node_list.last().unwrap().offset() {
-        	// cursor should be at second last position of the current node
-        	if cursor.node_idx == self.node_list.len() - 1 {
-        		// cursor should be on the last node in the list
-        		//	so just increment the node_offset and line_offset
-        		cursor.node_offset += 1;
-        		let current_node = &self.node_list[cursor.node_idx];
-        		if cursor.node_offset == current_node.last_line_offset() {
-        			// cursor should have passed over a '\n'
-        			cursor.line_idx += 1;
-        			cursor.line_offset = 0;
-        		} else {
-        			// cursor should have passed over something else
-        			cursor.line_offset += 1;
-        		}
-        	} else {
-        		// cursor should have a node on the right
-        		//	point the cursor to the beginning of that node
-	        	cursor.node_idx += 1;
-	        	cursor.node_offset = 0;
-	        	cursor.line_idx = 0;
-	        	cursor.line_offset = 0;
-        	}
+            // cursor should be at second last position of the current node
+            if cursor.node_idx == self.node_list.len() - 1 {
+                // cursor should be on the last node in the list
+                //	so just increment the node_offset and line_offset
+                cursor.node_offset += 1;
+                let current_node = &self.node_list[cursor.node_idx];
+                if cursor.node_offset == current_node.last_line_offset() {
+                    // cursor should have passed over a '\n'
+                    cursor.line_idx += 1;
+                    cursor.line_offset = 0;
+                } else {
+                    // cursor should have passed over something else
+                    cursor.line_offset += 1;
+                }
+            } else {
+                // cursor should have a node on the right
+                //	point the cursor to the beginning of that node
+                cursor.node_idx += 1;
+                cursor.node_offset = 0;
+                cursor.line_idx = 0;
+                cursor.line_offset = 0;
+            }
 
         } else {
-        	// cursor should be still within the same node
-        	//	increase the node_offset by 1
-        	//	update the line index based on whether it has crossed
-        	cursor.node_offset += 1;
-        	let current_node = &self.node_list[cursor.node_idx];
-        	if cursor.node_idx < current_node.line_offsets_len() - 1
-        		&&	cursor.node_offset
-        			== current_node.line_offset_at(cursor.line_idx + 1) {
-        		// cursor should have just passed over a '\n'
-        		cursor.line_idx += 1;
-        		cursor.line_offset = 0;
-        	} else {
-        		cursor.line_offset += 1;
-        	}
+            // cursor should be still within the same node
+            //	increase the node_offset by 1
+            //	update the line index based on whether it has crossed
+            cursor.node_offset += 1;
+            let current_node = &self.node_list[cursor.node_idx];
+            if cursor.node_idx < current_node.line_offsets_len() - 1
+                &&	cursor.node_offset
+                    == current_node.line_offset_at(cursor.line_idx + 1) {
+                // cursor should have just passed over a '\n'
+                cursor.line_idx += 1;
+                cursor.line_offset = 0;
+            } else {
+                cursor.line_offset += 1;
+            }
         }
     }
 

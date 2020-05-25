@@ -1,7 +1,7 @@
 use std::io;
 use std::sync::mpsc::{
-	self,
-	Sender
+    self,
+    Sender
 };
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -14,12 +14,12 @@ use termion::event::Key;
 use termion::input::TermRead;
 
 pub enum Event {
-	Tick {time: SystemTime},
-	Input {key: Key, time: SystemTime}
+    Tick {time: SystemTime},
+    Input {key: Key, time: SystemTime}
 }
 
 pub struct Events {
-	rx: mpsc::Receiver<Event>,
+    rx: mpsc::Receiver<Event>,
     input_handle: thread::JoinHandle<()>,
     ignore_exit_key: Arc<AtomicBool>,
     tick_handle: thread::JoinHandle<()>,
@@ -69,14 +69,14 @@ impl Events {
     }
 
     fn input_thread(ignore_exit_key: Arc<AtomicBool>, tx: Sender<Event>, exit_key: Key) {
-    	let stdin = io::stdin();
+        let stdin = io::stdin();
         for evt in stdin.keys() {
             match evt {
                 Ok(key) => {
-                	let to_send = Event::Input {
-                		key: key,
-                		time: SystemTime::now(),
-                	};
+                    let to_send = Event::Input {
+                        key: key,
+                        time: SystemTime::now(),
+                    };
 
                     if let Err(_) = tx.send(to_send) {
                         return;
@@ -93,9 +93,9 @@ impl Events {
     fn tick_thread(tx: Sender<Event>, tick_rate: Duration) {
         let tx = tx.clone();
         loop {
-        	let to_send = Event::Tick {
-	    		time: SystemTime::now(),
-        	};
+            let to_send = Event::Tick {
+                time: SystemTime::now(),
+            };
             tx.send(to_send).unwrap();
             thread::sleep(tick_rate);
         }
