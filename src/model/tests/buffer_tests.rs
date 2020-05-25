@@ -7,12 +7,12 @@ mod buffer_tests {
     }
 
     // get_offsets_tests
-    #[test]
+    /*#[test]
     fn get_offsets_none() {
         let string = String::from("abc");
         let offsets = Buffer::get_offsets(&string);
         assert_eq!(offsets, &[0]);
-    }
+    }*/
 
     #[test]
     fn get_offsets_first() {
