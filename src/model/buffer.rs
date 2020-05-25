@@ -3,8 +3,6 @@ use std::str;
 use crate::utils::Cursor;
 
 #[allow(dead_code)]
-
-
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum BufferType {
     Original,
@@ -21,7 +19,7 @@ struct BufferNode {
 
 impl BufferNode {
     fn new(from: BufferType, index: usize, offset: usize, line_offsets: Vec<usize>) -> BufferNode {
-        BufferNode{
+        BufferNode {
             from,
             index,
             offset,
@@ -66,24 +64,27 @@ pub struct Buffer {
     original_str: Vec<u8>,
     added_str: Vec<u8>,
     node_list: Vec<BufferNode>,
-
     // an important invariant is how the cursor is going to be placed.
     //  this is going to be maintained throughout the operations.
-    //  if the cursor is in between two nodes, it will always be at the 0 index of the 
+    //  if the cursor is in between two nodes, it will always be at the 0 index of the
     //  node on the right, rather than the end index of the left node.
     //  the only time the cursor will be at the end index of a node is if there is
     //  no other node to its right.
 }
 
 impl Buffer {
-
     fn get_offsets(string: &str) -> Vec<usize> {
         // Whelp this looks gross. Probably prettify or rewrite later on
         let acc = vec![0];
         let index_list: Vec<usize> = (1..=string.len()).collect();
-        string.chars().zip(index_list.iter())
-                        .filter(|(c, _)| *c == '\n')
-                        .fold(acc, |mut list, (c, idx)| {list.push(*idx); list})
+        string
+            .chars()
+            .zip(index_list.iter())
+            .filter(|(c, _)| *c == '\n')
+            .fold(acc, |mut list, (c, idx)| {
+                list.push(*idx);
+                list
+            })
     }
 
     pub fn new() -> Buffer {
@@ -111,7 +112,6 @@ impl Buffer {
     }
 
     pub fn insert_str(&mut self, cursor: &mut Cursor, string: String) {
-
         // construct the new node to be inserted
         let line_offsets = Buffer::get_offsets(&string);
         let idx = self.added_str.len();
@@ -145,7 +145,6 @@ impl Buffer {
             cursor.line_idx = new_node.line_offsets_len() - 1;
             cursor.line_offset = cursor.node_offset - new_node.last_line_offset();
             self.node_list.push(new_node);
-
         } else if cursor.node_offset == 0 {
             // cursor should be at the front of a node
             assert_eq!(cursor.node_offset, 0);
@@ -164,24 +163,20 @@ impl Buffer {
 
             // split the line_offsets based on where the cursor is
             let left_line_offsets = line_offsets.drain(..=cursor.line_idx).collect();
-            let mut right_line_offsets: Vec<usize> = line_offsets.drain( .. )
-                                                .map(|x| x - cursor.node_offset)
-                                                .collect();
+            let mut right_line_offsets: Vec<usize> = line_offsets
+                .drain(..)
+                .map(|x| x - cursor.node_offset)
+                .collect();
             right_line_offsets.insert(0, 0);
 
             // construct left and right nodes
-            let left_node = BufferNode::new(
-                                from,
-                                index,
-                                cursor.node_offset,
-                                left_line_offsets
-                            );
+            let left_node = BufferNode::new(from, index, cursor.node_offset, left_line_offsets);
             let right_node = BufferNode::new(
-                                from,
-                                index + cursor.node_offset,
-                                offset - cursor.node_offset,
-                                right_line_offsets
-                            );
+                from,
+                index + cursor.node_offset,
+                offset - cursor.node_offset,
+                right_line_offsets,
+            );
 
             // add the left, mid, right nodes in in that order to the list
             //  then remove the node that was split into those three
@@ -199,7 +194,6 @@ impl Buffer {
     }
 
     pub fn remove(&mut self, cursor: &mut Cursor) {
-
         if self.node_list.len() == 0 {
             // there's nothing to delete so just return
             return;
@@ -237,9 +231,9 @@ impl Buffer {
                 cursor.node_idx -= 1;
                 self.node_list.remove(cursor.node_idx);
             }
-            // no changes should need to be made to the cursor
-            //  for line_offsets, line_idx and node_offset
-            //  since it should still be referring to the same node
+        // no changes should need to be made to the cursor
+        //  for line_offsets, line_idx and node_offset
+        //  since it should still be referring to the same node
         } else if node_offset == self.node_list[node_idx].offset() {
             // cursor should be at the end of a node
             //  should only happen when cursor is at the last node
@@ -295,11 +289,12 @@ impl Buffer {
             let line_offsets = current_node.line_offsets();
 
             // split the line offsets of the current node into two parts
-            let mut left_line_offsets: Vec<usize> = line_offsets.drain(..=cursor.line_idx)
-                                                        .collect();
-            let mut right_line_offsets: Vec<usize> = line_offsets.drain( .. )
-                                                        .map(|x| x - cursor.node_offset)
-                                                        .collect();
+            let mut left_line_offsets: Vec<usize> =
+                line_offsets.drain(..=cursor.line_idx).collect();
+            let mut right_line_offsets: Vec<usize> = line_offsets
+                .drain(..)
+                .map(|x| x - cursor.node_offset)
+                .collect();
             right_line_offsets.insert(0, 0);
 
             if *left_line_offsets.last().unwrap() == cursor.node_offset {
@@ -308,17 +303,17 @@ impl Buffer {
             }
 
             let left_node = BufferNode::new(
-                                from,
-                                index,
-                                index + cursor.node_offset - 1,
-                                left_line_offsets
-                            );
+                from,
+                index,
+                index + cursor.node_offset - 1,
+                left_line_offsets,
+            );
             let right_node = BufferNode::new(
-                                from,
-                                index + cursor.node_offset,
-                                offset - cursor.node_offset,
-                                right_line_offsets
-                            );
+                from,
+                index + cursor.node_offset,
+                offset - cursor.node_offset,
+                right_line_offsets,
+            );
 
             // insert both the left node and the right node
             //  and remove the node that was split
@@ -342,19 +337,16 @@ impl Buffer {
         // construct a serialised string by iterating through the nodes
         //  and copying the contents that they refer to based on
         //  their indices and offsets and which string they refer to
-        self.node_list.iter()
-            .fold(String::new(),
-                |mut acc, node| {
-                let source = match node.from() {
-                    BufferType::Original => &self.original_str,
-                    BufferType::Added => &self.added_str,
-                };
-                let slice = &source[node.index()..node.index() + node.offset()];
-                let chunk = str::from_utf8(slice).unwrap();
-                acc.push_str(chunk);
-                acc
-            }
-        )
+        self.node_list.iter().fold(String::new(), |mut acc, node| {
+            let source = match node.from() {
+                BufferType::Original => &self.original_str,
+                BufferType::Added => &self.added_str,
+            };
+            let slice = &source[node.index()..node.index() + node.offset()];
+            let chunk = str::from_utf8(slice).unwrap();
+            acc.push_str(chunk);
+            acc
+        })
     }
 
     pub fn move_cursor_up(&self, cursor: &mut Cursor) {
@@ -386,12 +378,14 @@ impl Buffer {
                 // the last character of current node should be '\n'
                 //	so set cursor to point at the second last line
                 cursor.line_idx = current_node.line_offsets_len() - 2;
-                cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+                cursor.line_offset =
+                    cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
             } else {
                 // the last character of current node should not '\n'
                 //	so the cursor should point at the last line
                 cursor.line_idx = current_node.line_offsets_len() - 1;
-                cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+                cursor.line_offset =
+                    cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
             }
         } else {
             // cursor is not at the beginning of the node
@@ -403,7 +397,8 @@ impl Buffer {
                 // cursor should have moved over a '\n'
                 //	reduce the line index by 1, and update the line offset
                 cursor.line_idx -= 1;
-                cursor.line_offset = cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+                cursor.line_offset =
+                    cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
             } else {
                 // the last character of current node should not be '\n'
                 //	reduce the line offset by 1
@@ -419,10 +414,11 @@ impl Buffer {
             return;
         }
         if cursor.node_idx == self.node_list.len() - 1
-            && cursor.node_offset == self.node_list.last().unwrap().offset() {
-                // cursor should be pointing at the last position in the buffer
-                //	so there should be nothing to do but return
-                return;
+            && cursor.node_offset == self.node_list.last().unwrap().offset()
+        {
+            // cursor should be pointing at the last position in the buffer
+            //	so there should be nothing to do but return
+            return;
         }
 
         if cursor.node_offset + 1 == self.node_list.last().unwrap().offset() {
@@ -448,7 +444,6 @@ impl Buffer {
                 cursor.line_idx = 0;
                 cursor.line_offset = 0;
             }
-
         } else {
             // cursor should be still within the same node
             //	increase the node_offset by 1
@@ -456,8 +451,8 @@ impl Buffer {
             cursor.node_offset += 1;
             let current_node = &self.node_list[cursor.node_idx];
             if cursor.node_idx < current_node.line_offsets_len() - 1
-                &&	cursor.node_offset
-                    == current_node.line_offset_at(cursor.line_idx + 1) {
+                && cursor.node_offset == current_node.line_offset_at(cursor.line_idx + 1)
+            {
                 // cursor should have just passed over a '\n'
                 cursor.line_idx += 1;
                 cursor.line_offset = 0;
@@ -466,7 +461,6 @@ impl Buffer {
             }
         }
     }
-
 }
 
 #[cfg(test)]

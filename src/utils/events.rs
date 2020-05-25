@@ -1,8 +1,5 @@
 use std::io;
-use std::sync::mpsc::{
-    self,
-    Sender
-};
+use std::sync::mpsc::{self, Sender};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -14,8 +11,8 @@ use termion::event::Key;
 use termion::input::TermRead;
 
 pub enum Event {
-    Tick {time: SystemTime},
-    Input {key: Key, time: SystemTime}
+    Tick { time: SystemTime },
+    Input { key: Key, time: SystemTime },
 }
 
 pub struct Events {
