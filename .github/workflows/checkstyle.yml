@@ -25,7 +25,9 @@ jobs:
       - name: Capture output
         id: get_status
         run: echo "::set-output name=status::(git status --porcelain)"
-
+      - name: Debug, print what "status" is bound to
+        id: debug_step
+        run : echo ${{ steps.get_status.output.status != '' }}
       - name: Commit files
         if: ${{ steps.get_status.output.status != '' }}
         run: |
@@ -33,7 +35,7 @@ jobs:
           git config --local user.name "poochymin-bot"
           git commit -m "Format code" -a
       - name: Push changes, if attempting to commit works
-        if: ${{ steps.check.output.status != '' }}
+        if: ${{ steps.get_status.output.status != '' }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
