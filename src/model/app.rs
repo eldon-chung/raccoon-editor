@@ -12,6 +12,7 @@ pub enum AppMode {
 
 pub struct App {
     buffer: Buffer,
+    command_buffer: Buffer,
     cursor_main: Cursor,
     app_mode: AppMode,
 }
@@ -20,6 +21,7 @@ impl App {
     pub fn new() -> App {
         App {
             buffer: Buffer::new(),
+            command_buffer: Buffer::new(),
             cursor_main: Cursor::new(),
             app_mode: AppMode::Edit,
         }
@@ -38,24 +40,44 @@ impl App {
         self.app_mode
     }
 
+    pub fn set_app_mode(&mut self, app_mode: AppMode) {
+        self.app_mode = app_mode;
+    }
+
     pub fn get_text_as_iter(&self) -> Vec<String> {
-        vec![self.buffer.as_str()]
+        match self.app_mode() {
+            AppMode::Edit => vec![self.buffer.as_str()],
+            AppMode::Command => vec![self.command_buffer.as_str()],
+        }
     }
 
     pub fn add_char(&mut self, c: char) {
-        self.buffer.insert(&mut self.cursor_main, c);
+        match self.app_mode() {
+            AppMode::Edit => self.buffer.insert(&mut self.cursor_main, c),
+            AppMode::Command => self.command_buffer.insert(&mut self.cursor_main, c),
+        }
     }
 
     pub fn remove_char(&mut self) {
-        self.buffer.remove(&mut self.cursor_main);
+        match self.app_mode() {
+            AppMode::Edit => self.buffer.remove(&mut self.cursor_main),
+            AppMode::Command => self.command_buffer.remove(&mut self.cursor_main),
+        }
+        
     }
 
     pub fn move_cursor_left(&mut self) {
-        self.buffer.move_cursor_left(&mut self.cursor_main);
+        match self.app_mode() {
+            AppMode::Edit => self.buffer.move_cursor_left(&mut self.cursor_main),
+            AppMode::Command => self.command_buffer.move_cursor_left(&mut self.cursor_main),
+        }
     }
 
     pub fn move_cursor_right(&mut self) {
-        self.buffer.move_cursor_right(&mut self.cursor_main);
+        match self.app_mode() {
+            AppMode::Edit => self.buffer.move_cursor_right(&mut self.cursor_main),
+            AppMode::Command => self.command_buffer.move_cursor_right(&mut self.cursor_main),
+        }
     }
 
     pub fn save_file(&self) {
