@@ -18,7 +18,7 @@ jobs:
 
       - name: Create local changes
         run: |
-          git checkout -b ${{ steps.vars.outputs.short_ref }}
+          git checkout ${{ steps.vars.outputs.short_ref }}
           cargo fmt
       - name: Commit files
         run: |
