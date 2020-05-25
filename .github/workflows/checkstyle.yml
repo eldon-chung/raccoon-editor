@@ -9,6 +9,9 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/checkout@v2
 
+      - name: If push author is not the bot
+        if: ${{ github.event.pusher.name != 'poochymin-bot' }} != # what's the name
+
       - name: Set output
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
@@ -22,9 +25,11 @@ jobs:
           cargo fmt
       - name: Commit files
         run: |
-          git config --local user.email "eldon-chung@github.com"
-          git config --local user.name "eldon-chung"
+          git config --local user.email "poochymin@gmail.com"
+          git config --local user.name "poochymin-bot"
           git commit -m "Format code" -a
+      - name: If attempting to commit works
+        if: ${{ success() }}
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
