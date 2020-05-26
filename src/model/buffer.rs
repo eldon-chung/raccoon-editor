@@ -118,6 +118,14 @@ impl Buffer {
         let offset = string.len();
         let new_node = BufferNode::new(BufferType::Added, idx, offset, line_offsets);
 
+        assert!(new_node.line_offsets_len() >= 1);
+        let offset = new_node.offset();
+        let last_line_offset = new_node.last_line_offset();
+        let line_idx_update: Box<dyn Fn(usize) -> usize> = match new_node.line_offsets_len() {
+            1 => Box::new(|line_offset| { line_offset + offset }),
+            _ => Box::new(|line_offset| { offset - last_line_offset }),
+        };
+
         // append string to add_str
         let mut vec_converted = string.as_bytes().to_vec();
         self.added_str.append(&mut vec_converted);
@@ -125,10 +133,17 @@ impl Buffer {
         if self.node_list.len() == 0 {
             // node_list should be empty, so just push and return
             //  cursor should be referring to the end of the first node
+            assert_eq!(cursor.node_idx, 0);
+            assert_eq!(cursor.node_offset, 0);
+            assert_eq!(cursor.line_idx, 0);
+            assert_eq!(cursor.line_offset, 0);
+            assert_eq!(cursor.original_line_offset, 0);
+
             cursor.node_idx = 0;
-            cursor.node_offset = offset;
+            cursor.node_offset = new_node.offset();
             cursor.line_idx = new_node.line_offsets_len() - 1;
-            cursor.line_offset = cursor.node_offset - new_node.last_line_offset();
+            cursor.line_offset = line_idx_update(cursor.line_offset);
+            cursor.original_line_offset = cursor.line_offset;
             self.node_list.push(new_node);
             return;
         }
@@ -143,17 +158,21 @@ impl Buffer {
             cursor.node_idx += 1;
             cursor.node_offset = new_node.offset();
             cursor.line_idx = new_node.line_offsets_len() - 1;
-            cursor.line_offset = cursor.node_offset - new_node.last_line_offset();
+            cursor.line_offset = line_idx_update(cursor.line_offset);
+            cursor.original_line_offset = cursor.line_offset;
+
             self.node_list.push(new_node);
         } else if cursor.node_offset == 0 {
             // cursor should be at the front of a node
             assert_eq!(cursor.node_offset, 0);
             assert_eq!(cursor.line_idx, 0);
-            assert_eq!(cursor.line_offset, 0);
             // just insert the new node before current node
             //	which is where the cursor is
             self.node_list.insert(cursor.node_idx, new_node);
             cursor.node_idx += 1;
+            cursor.line_offset = line_idx_update(cursor.line_offset);
+            cursor.original_line_offset = cursor.line_offset;
+
         } else {
             // split the node into two and insert it in between
             let from = node_to_split.from();
@@ -187,20 +206,26 @@ impl Buffer {
 
             // update cursor to point at the beginning of the right node
             cursor.node_idx += 2;
-            cursor.line_offset = 0;
             cursor.node_offset = 0;
             cursor.line_idx = 0;
+            cursor.line_offset = line_idx_update(cursor.line_offset);
+            cursor.original_line_offset = cursor.line_offset;
         }
     }
 
     pub fn remove(&mut self, cursor: &mut Cursor) {
         if self.node_list.len() == 0 {
-            // there's nothing to delete so just return
+            // node_list should be empty, so just return
+            assert_eq!(cursor.node_idx, 0);
+            assert_eq!(cursor.node_offset, 0);
+            assert_eq!(cursor.line_idx, 0);
+            assert_eq!(cursor.line_offset, 0);
+            assert_eq!(cursor.original_line_offset, 0);
             return;
         }
 
         if cursor.node_idx == 0 && cursor.node_offset == 0 {
-            // cursor is all the way at the front of the buffer
+            // cursor should just be at the end of the buffer
             //  so just return
             return;
         }
@@ -212,42 +237,69 @@ impl Buffer {
             //  reduce the offset of the previous node by 1
             //  then update cursor and node_list as necessary
 
-            // get the previous node
-            let prev_node = &mut self.node_list[node_idx - 1];
-
-            if prev_node.last_line_offset() == prev_node.offset() {
-                assert!(prev_node.offset() >= 1);
+            // get fields of the previous node
+            let prev_last_line_offset = self.node_list[node_idx - 1].last_line_offset();
+            let prev_offset = self.node_list[node_idx - 1].offset();
+            let prev_line_offsets = self.node_list[node_idx - 1].line_offsets();
+            let mut was_newline = false;
+            if prev_last_line_offset == prev_offset {
+                assert!(prev_offset >= 1);
                 // the last character of that node should be '\n'
                 //  in that case we should remove it from the list
                 //  of line offsets
-                prev_node.line_offsets.pop();
+                prev_line_offsets.pop();
+                was_newline = true;
             }
 
-            prev_node.reduce_offset_by(1);
+            self.node_list[node_idx - 1].reduce_offset_by(1);
 
-            if prev_node.offset == 0 {
+            if self.node_list[node_idx - 1].offset() == 0 {
                 // node should now be empty
                 //  remove it from list
                 cursor.node_idx -= 1;
                 self.node_list.remove(cursor.node_idx);
             }
-        // no changes should need to be made to the cursor
-        //  for line_offsets, line_idx and node_offset
-        //  since it should still be referring to the same node
+            // no changes should need to be made to the cursor for node_offset
+            //  and line_idx since cursor should still be on the same node
+            // update line_offset based on whether the character deleted was a newline
+            assert_eq!(was_newline, cursor.line_offset == 0);
+            if was_newline {
+                // deleted character should have been a newline
+                let mut to_add: usize = 0;
+                for idx in (0..cursor.node_idx).rev() {
+                    let indexed_node = &self.node_list[idx];
+                    to_add = indexed_node.offset() - indexed_node.last_line_offset();
+                    if indexed_node.last_line_offset() != 0 {
+                        break;
+                    }
+                }
+                cursor.line_offset = to_add;
+                cursor.original_line_offset = cursor.line_offset;
+            } else {
+                // deleted character should not have been a newline
+                cursor.line_offset -= 1;
+                cursor.original_line_offset = cursor.line_offset;
+            }
+
         } else if node_offset == self.node_list[node_idx].offset() {
             // cursor should be at the end of a node
             //  should only happen when cursor is at the last node
             assert_eq!(node_idx, self.node_list.len() - 1);
 
-            let current_node = &mut self.node_list[cursor.node_idx];
-            if current_node.last_line_offset() == cursor.node_offset {
+            // get fields of the current node
+            let curr_last_line_offset = self.node_list[node_idx].last_line_offset();
+            let curr_offset = self.node_list[node_idx].offset();
+            let curr_line_offsets = self.node_list[node_idx].line_offsets();
+            let mut was_newline = false;
+            if curr_last_line_offset == cursor.node_offset {
                 // the last character of current node should be '\n'
-                current_node.line_offsets.pop();
+                curr_line_offsets.pop();
+                was_newline = true;
             }
 
-            current_node.reduce_offset_by(1);
+            self.node_list[node_idx].reduce_offset_by(1);
 
-            if current_node.offset() == 0 {
+            if self.node_list[node_idx].offset() == 0 {
                 // node should now be empty, remove it from list
                 self.node_list.remove(cursor.node_idx);
 
@@ -264,6 +316,7 @@ impl Buffer {
                     cursor.node_offset = 0;
                     cursor.line_idx = 0;
                     cursor.line_offset = 0;
+                    cursor.original_line_offset = 0;
                     return;
                 }
 
@@ -271,23 +324,41 @@ impl Buffer {
                 let current_node = &self.node_list[cursor.node_idx];
                 cursor.node_offset = current_node.offset();
                 cursor.line_idx = current_node.line_offsets_len() - 1;
-                cursor.line_offset = cursor.node_offset - current_node.last_line_offset();
+                let mut to_add: usize = 0;
             } else {
                 // node should not be empty
                 //  reduce offset of cursor by 1
                 //  and update line_idx and line_offset accordingly
+                let current_node = &self.node_list[cursor.node_idx];
                 cursor.node_offset -= 1;
                 cursor.line_idx = current_node.line_offsets_len() - 1;
-                cursor.line_offset = current_node.offset() - current_node.last_line_offset();
+            }
+
+            assert_eq!(was_newline, cursor.line_offset == 0);
+            if was_newline {
+                // deleted character should be a newline
+                let mut to_add: usize = 0;
+                for idx in (0..=cursor.node_idx).rev() {
+                    let indexed_node = &self.node_list[idx];
+                    to_add = indexed_node.offset() - indexed_node.last_line_offset();
+                    if indexed_node.last_line_offset() != 0 {
+                        break;
+                    }
+                }
+                cursor.line_offset = to_add;
+                cursor.original_line_offset = cursor.line_offset;
+            } else {
+                // deleted character should not be a newline
+                cursor.line_offset -= 1;
+                cursor.original_line_offset = cursor.line_offset;
             }
         } else {
             // cursor should be in the middle of a node
-            let current_node = &mut self.node_list[cursor.node_idx];
-            let from = current_node.from();
-            let index = current_node.index();
-            let offset = current_node.offset();
-            let line_offsets = current_node.line_offsets();
-
+            let from = self.node_list[cursor.node_idx].from();
+            let index = self.node_list[cursor.node_idx].index();
+            let offset = self.node_list[cursor.node_idx].offset();
+            let line_offsets = self.node_list[cursor.node_idx].line_offsets();
+            let mut was_newline = false;
             // split the line offsets of the current node into two parts
             let mut left_line_offsets: Vec<usize> =
                 line_offsets.drain(..=cursor.line_idx).collect();
@@ -300,6 +371,7 @@ impl Buffer {
             if *left_line_offsets.last().unwrap() == cursor.node_offset {
                 // the last character of the left node should be '\n'
                 left_line_offsets.pop();
+                was_newline = true;
             }
 
             let left_node = BufferNode::new(
@@ -325,7 +397,25 @@ impl Buffer {
             cursor.node_idx += 1;
             cursor.node_offset = 0;
             cursor.line_idx = 0;
-            cursor.line_offset = 0;
+
+            assert_eq!(was_newline, cursor.line_offset == 0);
+            if was_newline {
+                // deleted character should be a newline
+                let mut to_add: usize = 0;
+                for idx in (0..cursor.node_idx).rev() {
+                    let indexed_node = &self.node_list[idx];
+                    to_add = indexed_node.offset() - indexed_node.last_line_offset();
+                    if indexed_node.last_line_offset() != 0 {
+                        break;
+                    }
+                }
+                cursor.line_offset = to_add;
+                cursor.original_line_offset = cursor.line_offset;
+            } else {
+                // deleted characted should not be a newline
+                cursor.line_offset -= 1;
+                cursor.original_line_offset = cursor.line_offset;
+            }
         }
     }
 
@@ -367,25 +457,42 @@ impl Buffer {
         if cursor.node_offset == 0 {
             // cursor should be at the front of a node
             //  move the cursor to the previous node
-            //  update the node_offset and line_offset and line_idx
-            //  based on the second last character
+            // update the node_offset and line_offset and line_idx
+            //  based on the last character
             cursor.node_idx -= 1;
-
             let current_node: &BufferNode = &self.node_list[cursor.node_idx];
 
             cursor.node_offset = current_node.offset() - 1;
             if current_node.last_line_offset() == current_node.offset() {
                 // the last character of current node should be '\n'
-                //	so set cursor to point at the second last line
-                cursor.line_idx = current_node.line_offsets_len() - 2;
-                cursor.line_offset =
-                    cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+                //	set cursor to point at the second last line
+                //  and recompute the line offset
+                let line_idx = current_node.line_offsets_len() - 2;
+                if line_idx != 0 {
+                    // should have a '\n' before the cursor in the current node
+                    cursor.line_idx = line_idx;
+                    cursor.line_offset =
+                        current_node.last_line_offset() - current_node.line_offset_at(line_idx) - 1;
+                    cursor.original_line_offset = cursor.line_offset;
+                } else {
+                    // should not have a '\n' before the cursor in the current node
+                    let mut to_add: usize = cursor.node_offset;
+                    for idx in (0..cursor.node_idx).rev() {
+                        let current_node = &self.node_list[idx];
+                        to_add = current_node.offset() - current_node.last_line_offset();
+                        if current_node.last_line_offset() != 0 {
+                            break;
+                        }
+                    }
+                    cursor.line_offset = to_add;
+                    cursor.original_line_offset = cursor.line_offset;
+                }
             } else {
-                // the last character of current node should not '\n'
+                // the last character of current node should not be '\n'
                 //	so the cursor should point at the last line
                 cursor.line_idx = current_node.line_offsets_len() - 1;
-                cursor.line_offset =
-                    cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+                cursor.line_offset -= 1;
+                cursor.original_line_offset = cursor.node_offset;
             }
         } else {
             // cursor is not at the beginning of the node
@@ -397,12 +504,33 @@ impl Buffer {
                 // cursor should have moved over a '\n'
                 //	reduce the line index by 1, and update the line offset
                 cursor.line_idx -= 1;
-                cursor.line_offset =
-                    cursor.node_offset - current_node.line_offset_at(cursor.line_idx);
+
+                if cursor.line_idx != 0 {
+                    // should have a '\n' before the cursor in the current node
+                    cursor.line_offset =
+                        current_node.last_line_offset()
+                        - current_node.line_offset_at(cursor.line_idx)
+                        - 1;
+                    cursor.original_line_offset = cursor.line_offset;
+                } else {
+                    // should not have a '\n' before the cursor in the current node
+                    let mut to_add: usize = cursor.node_offset;
+                    for idx in (0..cursor.node_idx).rev() {
+                        let current_node = &self.node_list[idx];
+                        to_add = current_node.offset() - current_node.last_line_offset();
+                        if current_node.last_line_offset() != 0 {
+                            break;
+                        }
+                    }
+                    cursor.line_offset = to_add;
+                    cursor.original_line_offset = cursor.line_offset;
+                }
+
             } else {
                 // the last character of current node should not be '\n'
                 //	reduce the line offset by 1
                 cursor.line_offset -= 1;
+                cursor.original_line_offset = cursor.line_offset;
             }
         }
     }
@@ -410,14 +538,16 @@ impl Buffer {
     pub fn move_cursor_right(&self, cursor: &mut Cursor) {
         if self.node_list.len() == 0 {
             // node_list should be empty and thus there is nothing to do
-            //	so just return
+            //  so just return
             return;
         }
+
         if cursor.node_idx == self.node_list.len() - 1
             && cursor.node_offset == self.node_list.last().unwrap().offset()
         {
             // cursor should be pointing at the last position in the buffer
-            //	so there should be nothing to do but return
+            //  so there should be nothing to do but return
+            cursor.original_line_offset = cursor.line_offset;
             return;
         }
 
@@ -432,9 +562,11 @@ impl Buffer {
                     // cursor should have passed over a '\n'
                     cursor.line_idx += 1;
                     cursor.line_offset = 0;
+                    cursor.original_line_offset = cursor.line_offset;
                 } else {
                     // cursor should have passed over something else
                     cursor.line_offset += 1;
+                    cursor.original_line_offset = cursor.line_offset;
                 }
             } else {
                 // cursor should have a node on the right
@@ -442,7 +574,17 @@ impl Buffer {
                 cursor.node_idx += 1;
                 cursor.node_offset = 0;
                 cursor.line_idx = 0;
-                cursor.line_offset = 0;
+                if self.node_list[cursor.node_idx - 1].last_line_offset()
+                    == self.node_list[cursor.node_idx - 1].offset()
+                {
+                    // cursor should have passed over a newline
+                    cursor.line_offset = 0;
+                    cursor.original_line_offset = cursor.line_offset;
+                } else {
+                    // cursor should not have passed over a newline
+                    cursor.line_offset += 1;
+                    cursor.original_line_offset = cursor.line_offset;
+                }
             }
         } else {
             // cursor should be still within the same node
@@ -450,14 +592,16 @@ impl Buffer {
             //	update the line index based on whether it has crossed
             cursor.node_offset += 1;
             let current_node = &self.node_list[cursor.node_idx];
-            if cursor.node_idx < current_node.line_offsets_len() - 1
+            if cursor.line_idx + 1 <= current_node.line_offsets_len() - 1
                 && cursor.node_offset == current_node.line_offset_at(cursor.line_idx + 1)
             {
                 // cursor should have just passed over a '\n'
                 cursor.line_idx += 1;
                 cursor.line_offset = 0;
+                cursor.original_line_offset = cursor.line_offset;
             } else {
                 cursor.line_offset += 1;
+                cursor.original_line_offset = cursor.line_offset;
             }
         }
     }
