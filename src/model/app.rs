@@ -1,4 +1,4 @@
-use crate::utils::Cursor;
+use crate::utils::cursor::Cursor;
 
 use super::buffer::Buffer;
 

@@ -1,6 +1,6 @@
 use std::str;
 
-use crate::utils::Cursor;
+use crate::utils::cursor::Cursor;
 
 #[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Debug)]
