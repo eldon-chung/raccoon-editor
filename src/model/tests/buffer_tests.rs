@@ -66,7 +66,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 1, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 1,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -85,7 +88,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 1, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 0, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 0,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -105,7 +111,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 2, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 2, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 0, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 0,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -130,7 +139,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 1, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 1,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -160,7 +172,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 3, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 1, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 1, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 1,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -196,7 +211,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 5, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 5, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 5,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -232,7 +250,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 1, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 1,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -251,7 +272,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 0, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 0,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -273,7 +297,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 0, "cursor.line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 0,
+            "cursor.line_offset mismatch"
+        );
     }
 
     #[test]
@@ -293,7 +320,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 0, "cursor.line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 0,
+            "cursor.line_offset mismatch"
+        );
     }
 
     #[test]
@@ -317,7 +347,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 2, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 2, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 2,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -341,7 +374,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 1, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 1,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -366,7 +402,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 0, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 0,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -395,7 +434,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 2, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 2,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -424,7 +466,10 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 2, "cursor.original_line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, 2,
+            "cursor.original_line_offset mismatch"
+        );
     }
 
     #[test]
@@ -498,8 +543,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -516,8 +560,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -537,8 +580,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -560,8 +602,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -582,8 +623,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -610,8 +650,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -638,8 +677,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -667,8 +705,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -684,8 +721,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -707,8 +743,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -728,8 +763,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -748,8 +782,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -770,8 +803,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 1, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -798,8 +830,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 4, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -826,8 +857,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -853,10 +883,12 @@ mod buffer_tests {
         assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 4, "cursor.line_offset mismatch");
-        assert_eq!(cursor.original_line_offset, 4, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, 4,
+            "cursor.line_offset mismatch"
+        );
+        assert_eq!(
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }
@@ -890,8 +922,7 @@ mod buffer_tests {
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
         assert_eq!(
-            cursor.original_line_offset,
-            cursor.line_offset,
+            cursor.original_line_offset, cursor.line_offset,
             "original_line_offset not equals to line_offset!"
         );
     }

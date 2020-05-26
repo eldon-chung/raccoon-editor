@@ -122,8 +122,8 @@ impl Buffer {
         let offset = new_node.offset();
         let last_line_offset = new_node.last_line_offset();
         let line_idx_update: Box<dyn Fn(usize) -> usize> = match new_node.line_offsets_len() {
-            1 => Box::new(|line_offset| { line_offset + offset }),
-            _ => Box::new(|line_offset| { offset - last_line_offset }),
+            1 => Box::new(|line_offset| line_offset + offset),
+            _ => Box::new(|line_offset| offset - last_line_offset),
         };
 
         // append string to add_str
@@ -172,7 +172,6 @@ impl Buffer {
             cursor.node_idx += 1;
             cursor.line_offset = line_idx_update(cursor.line_offset);
             cursor.original_line_offset = cursor.line_offset;
-
         } else {
             // split the node into two and insert it in between
             let from = node_to_split.from();
@@ -280,7 +279,6 @@ impl Buffer {
                 cursor.line_offset -= 1;
                 cursor.original_line_offset = cursor.line_offset;
             }
-
         } else if node_offset == self.node_list[node_idx].offset() {
             // cursor should be at the end of a node
             //  should only happen when cursor is at the last node
@@ -507,8 +505,7 @@ impl Buffer {
 
                 if cursor.line_idx != 0 {
                     // should have a '\n' before the cursor in the current node
-                    cursor.line_offset =
-                        current_node.last_line_offset()
+                    cursor.line_offset = current_node.last_line_offset()
                         - current_node.line_offset_at(cursor.line_idx)
                         - 1;
                     cursor.original_line_offset = cursor.line_offset;
@@ -525,7 +522,6 @@ impl Buffer {
                     cursor.line_offset = to_add;
                     cursor.original_line_offset = cursor.line_offset;
                 }
-
             } else {
                 // the last character of current node should not be '\n'
                 //	reduce the line offset by 1

@@ -6,7 +6,7 @@ pub struct GapBuffer<E> {
     right_list: VecDeque<E>,
 }
 
-impl <E>GapBuffer<E> {
+impl<E> GapBuffer<E> {
     fn new() -> GapBuffer<E> {
         GapBuffer {
             left_list: VecDeque::new(),
@@ -128,8 +128,7 @@ impl <E>GapBuffer<E> {
     }
 
     fn is_tail(&self) -> bool {
-        return self.right_list.is_empty()
-            && !self.left_list.is_empty();
+        return self.right_list.is_empty() && !self.left_list.is_empty();
     }
 
     fn is_empty(&self) -> bool {
