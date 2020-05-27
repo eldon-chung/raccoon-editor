@@ -1,20 +1,22 @@
 use std::collections::VecDeque;
+use std::iter::Iterator;
 
 #[derive(Debug)]
 pub struct GapBuffer<E> {
-    left_list: VecDeque<E>,
-    right_list: VecDeque<E>,
+    pub left_list: VecDeque<E>,
+    pub right_list: VecDeque<E>,
 }
 
+#[allow(dead_code)]
 impl<E> GapBuffer<E> {
-    fn new() -> GapBuffer<E> {
+    pub fn new() -> GapBuffer<E> {
         GapBuffer {
             left_list: VecDeque::new(),
             right_list: VecDeque::new(),
         }
     }
 
-    fn with_contents(mut contents: Vec<E>) -> GapBuffer<E> {
+    pub fn with_contents(mut contents: Vec<E>) -> GapBuffer<E> {
         let left_list: VecDeque<E> = contents.drain(..).collect();
         GapBuffer {
             left_list: left_list,
@@ -22,7 +24,7 @@ impl<E> GapBuffer<E> {
         }
     }
 
-    fn insert_after(&mut self, element: E) {
+    pub fn insert_after(&mut self, element: E) {
         if self.left_list.is_empty() {
             self.left_list.push_front(element);
             return;
@@ -30,7 +32,7 @@ impl<E> GapBuffer<E> {
         self.right_list.push_front(element);
     }
 
-    fn insert_before(&mut self, element: E) {
+    pub fn insert_before(&mut self, element: E) {
         if self.left_list.is_empty() {
             self.left_list.push_front(element);
             return;
@@ -43,11 +45,11 @@ impl<E> GapBuffer<E> {
         self.left_list.push_back(current_element.unwrap());
     }
 
-    fn delete_after(&mut self) {
+    pub fn delete_after(&mut self) {
         self.right_list.pop_front();
     }
 
-    fn delete_before(&mut self) {
+    pub fn delete_before(&mut self) {
         let current_element = self.left_list.pop_back();
         self.left_list.pop_back();
         if current_element.is_none() {
@@ -56,7 +58,7 @@ impl<E> GapBuffer<E> {
         self.left_list.push_back(current_element.unwrap());
     }
 
-    fn delete_current(&mut self) {
+    pub fn delete_current(&mut self) {
         self.left_list.pop_back();
         if !self.left_list.is_empty() {
             return;
@@ -68,7 +70,7 @@ impl<E> GapBuffer<E> {
         self.left_list.push_back(current_element.unwrap());
     }
 
-    fn move_pointer_right(&mut self) {
+    pub fn move_pointer_right(&mut self) {
         let current_element = self.right_list.pop_front();
         if current_element.is_none() {
             return;
@@ -76,7 +78,7 @@ impl<E> GapBuffer<E> {
         self.left_list.push_back(current_element.unwrap());
     }
 
-    fn move_pointer_left(&mut self) {
+    pub fn move_pointer_left(&mut self) {
         if self.left_list.len() <= 1 {
             return;
         }
@@ -84,30 +86,30 @@ impl<E> GapBuffer<E> {
         self.right_list.push_front(current_element.unwrap());
     }
 
-    fn get_current(&mut self) -> Option<&E> {
+    pub fn get_current(&mut self) -> Option<&E> {
         self.left_list.back()
     }
 
-    fn get_next(&mut self) -> Option<&E> {
+    pub fn get_next(&mut self) -> Option<&E> {
         self.right_list.front()
     }
 
-    fn get_prev(&mut self) -> Option<&E> {
+    pub fn get_prev(&mut self) -> Option<&E> {
         if self.left_list.len() < 2 {
             return None;
         }
         self.left_list.get(self.left_list.len() - 2)
     }
 
-    fn get_current_mut(&mut self) -> Option<&mut E> {
+    pub fn get_current_mut(&mut self) -> Option<&mut E> {
         self.left_list.back_mut()
     }
 
-    fn get_next_mut(&mut self) -> Option<&mut E> {
+    pub fn get_next_mut(&mut self) -> Option<&mut E> {
         self.right_list.front_mut()
     }
 
-    fn get_prev_mut(&mut self) -> Option<&mut E> {
+    pub fn get_prev_mut(&mut self) -> Option<&mut E> {
         if self.left_list.len() < 2 {
             return None;
         }
@@ -115,25 +117,52 @@ impl<E> GapBuffer<E> {
         self.left_list.get_mut(self.left_list.len() - 2)
     }
 
-    fn get_idx(&self) -> usize {
+    pub fn get_idx(&self) -> usize {
         self.left_list.len() - 1
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.left_list.len() + self.right_list.len()
     }
 
-    fn is_head(&self) -> bool {
+    pub fn is_head(&self) -> bool {
         self.left_list.len() == 1
     }
 
-    fn is_tail(&self) -> bool {
+    pub fn is_tail(&self) -> bool {
         return self.right_list.is_empty() && !self.left_list.is_empty();
     }
 
-    fn is_empty(&self) -> bool {
-        assert!(!(self.left_list.len() == 0) || (self.right_list.len() == 0));
+    pub fn is_empty(&self) -> bool {
+        assert!(!(self.left_list.is_empty()) || (self.right_list.is_empty()));
         self.left_list.is_empty()
+    }
+
+    pub fn left_list_as_vec(&self) -> Vec<&E> {
+        let left_list_copy: Vec<_> = self.left_list.iter().collect();
+        left_list_copy
+    }
+
+    pub fn right_list_as_vec(&self) -> Vec<&E> {
+        let right_list_copy: Vec<_> = self.right_list.iter().collect();
+        right_list_copy
+    }
+
+    pub fn left_right_list_as_vec(&self) -> Vec<&E> {
+        let mut left_list_copy: Vec<_> = self.left_list.iter().collect();
+        let mut right_list_copy: Vec<_> = self.right_list.iter().collect();
+        left_list_copy.append(&mut right_list_copy);
+        left_list_copy
+    }
+
+    #[cfg(test)]
+    pub fn left_list(&mut self) -> Vec<E> {
+        self.left_list.drain(..).collect()
+    }
+
+    #[cfg(test)]
+    pub fn right_list(&mut self) -> Vec<E> {
+        self.right_list.drain(..).collect()
     }
 }
 
