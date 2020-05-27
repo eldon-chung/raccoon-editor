@@ -89,7 +89,6 @@ mod buffer_tests {
 
         assert_eq!(buffer.node_list.left_list(), [node_0]);
         assert_eq!(buffer.node_list.right_list(), []);
-        assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
         assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 1, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");
@@ -155,7 +154,6 @@ mod buffer_tests {
     fn insert_after_node() {
         let mut cursor = Cursor::new();
         let mut buffer = Buffer::with_contents(String::from("abdc\nef"));
-        cursor.node_idx = 0;
         cursor.node_offset = 7;
         cursor.line_idx = 1;
         cursor.line_offset = 2;
@@ -976,7 +974,6 @@ mod buffer_tests {
         assert_eq!(buffer.node_list.left_list(), [node_0]);
         assert_eq!(buffer.node_list.right_list(), [node_1]);
 
-        assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
         assert_eq!(cursor.node_offset, 2, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch");
@@ -996,7 +993,6 @@ mod buffer_tests {
         assert_eq!(buffer.node_list.left_list(), []);
         assert_eq!(buffer.node_list.right_list(), []);
 
-        assert_eq!(cursor.node_idx, 0, "cursor.node_idx mismatch");
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
         assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch");

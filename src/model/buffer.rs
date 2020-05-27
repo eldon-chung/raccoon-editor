@@ -170,7 +170,6 @@ impl Buffer {
             // just insert the new node before current node
             //	which is where the cursor is
             self.node_list.insert_before(new_node);
-            cursor.node_idx += 1;
             cursor.line_offset = line_idx_update(cursor.line_offset);
             cursor.original_line_offset = cursor.line_offset;
         } else {
@@ -228,7 +227,6 @@ impl Buffer {
             return;
         }
 
-        let node_idx = cursor.node_idx;
         let node_offset = cursor.node_offset;
         if node_offset == 0 {
             // cursor should be in the front of a node
@@ -302,10 +300,9 @@ impl Buffer {
                 //  then refer to previous node if it is not the first node
                 self.node_list.delete_current();
 
-                if self.node_list.len() == 0 {
+                if self.node_list.is_empty() {
                     // should not be any more nodes in node_list
                     //  zero out the cursor and return
-                    cursor.node_idx = 0;
                     cursor.node_offset = 0;
                     cursor.line_idx = 0;
                     cursor.line_offset = 0;
@@ -432,7 +429,7 @@ impl Buffer {
     }
 
     pub fn move_cursor_up(&self, cursor: &mut Cursor) {
-        todo!();
+        
     }
 
     pub fn move_cursor_down(&self, cursor: &mut Cursor) {

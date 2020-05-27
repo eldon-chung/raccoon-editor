@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub struct Cursor {
-    pub node_idx: usize,    // current node to reference
+    //pub node_idx: usize,    // current node to reference
     pub node_offset: usize, // the offset based on the current node
     pub line_idx: usize,    // current line based on the node
     pub line_offset: usize, // actual/current offset from left newline
@@ -14,7 +14,7 @@ pub struct Cursor {
 impl Cursor {
     pub fn new() -> Cursor {
         Cursor {
-            node_idx: 0,
+            //node_idx: 0,
             node_offset: 0,
             line_idx: 0,
             line_offset: 0,
