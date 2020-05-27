@@ -59,6 +59,10 @@ impl BufferNode {
     fn last_line_offset(&self) -> usize {
         *self.line_offsets.last().unwrap()
     }
+
+    fn has_newline(&self) -> bool {
+        self.line_offsets_len() > 1
+    }
 }
 
 pub struct Buffer {
@@ -428,7 +432,91 @@ impl Buffer {
             })
     }
 
-    pub fn move_cursor_up(&self, cursor: &mut Cursor) {}
+    pub fn move_cursor_up(&mut self, cursor: &mut Cursor) {
+        if self.node_list.is_empty() {
+            return;
+        }
+
+        if (cursor.line_idx > 1) || (cursor.line_idx == 1 && self.node_list.is_head()) {
+            // the previous newline should still be at the current node
+            let new_line_idx = cursor.line_idx - 1;
+            let starting_offset = self.node_list.get_current()
+                                    .unwrap()
+                                    .line_offset_at(new_line_idx);
+            let next_offset = self.node_list.get_current()
+                                    .unwrap()
+                                    .line_offset_at(cursor.line_idx);
+            let max_offset = next_offset - starting_offset - 1;
+
+            cursor.line_offset
+                = if cursor.original_line_offset > max_offset
+                    { max_offset }
+                    else { cursor.original_line_offset };
+            cursor.line_idx = new_line_idx;
+            cursor.node_offset = starting_offset + cursor.line_offset;
+        } else if cursor.line_idx == 1 {
+            // cursor should be after the first newline at the current node
+            assert!(!self.node_list.is_head());
+
+            self.node_list.move_pointer_left();
+            while !self.node_list.get_current().unwrap().has_newline()
+                && !self.node_list.is_head() {
+                self.node_list.move_pointer_left();
+            }
+            cursor.line_offset = 0;
+            let mut remaining_offset = cursor.original_line_offset;
+            let max_line_offset =
+                self.node_list.get_current().unwrap().offset()
+                - self.node_list.get_current().unwrap().last_line_offset();
+
+            if remaining_offset < max_line_offset {
+                cursor.line_offset = remaining_offset;
+                cursor.line_idx = self.node_list.get_current()
+                                    .unwrap().line_offsets_len() - 1;
+                cursor.node_offset = self.node_list.get_current()
+                                        .unwrap().line_offset_at(cursor.line_idx)
+                                    + cursor.line_offset;
+                return;
+            }
+
+            cursor.line_offset += max_line_offset;
+            remaining_offset -= max_line_offset;
+            self.node_list.move_pointer_right();
+            let mut max_line_offset = self.node_list.get_current().unwrap().offset();
+            while !self.node_list.get_current().unwrap().has_newline()
+                && !self.node_list.is_tail()
+                && remaining_offset >= max_line_offset {
+
+                remaining_offset -= max_line_offset;
+                cursor.line_offset += max_line_offset;
+                max_line_offset = self.node_list.get_current().unwrap().offset();
+                self.node_list.move_pointer_right();
+            }
+
+            if self.node_list.get_current().unwrap().has_newline() {
+                let max_line_offset =
+                    self.node_list.get_current().unwrap().line_offset_at(1) - 1;
+                let to_add = if max_line_offset < remaining_offset
+                            { max_line_offset }
+                            else { remaining_offset };
+                cursor.line_offset += to_add;
+                cursor.line_idx = 0;
+                cursor.node_offset = to_add;
+            } else {
+                // remaining_offset should land the cursor within this node
+                let max_line_offset =
+                    self.node_list.get_current().unwrap().offset();
+                let to_add = if max_line_offset < remaining_offset
+                            { max_line_offset }
+                            else { remaining_offset };
+                cursor.line_offset += to_add;
+                cursor.line_idx = 0;
+                cursor.node_offset = to_add;
+            }
+        } else {
+            assert_eq!(cursor.line_idx, 0);
+        }
+    }
 
     pub fn move_cursor_down(&self, cursor: &mut Cursor) {
         todo!();
