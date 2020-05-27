@@ -213,7 +213,6 @@ impl Buffer {
     }
 
     pub fn remove(&mut self, cursor: &mut Cursor) {
-        
         if self.node_list.is_empty() {
             // node_list should be empty, so just return
             assert_eq!(cursor.node_offset, 0);

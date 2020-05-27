@@ -718,7 +718,6 @@ mod buffer_tests {
 
         buffer.move_cursor_left(&mut cursor);
 
-
         let node_0 = BufferNode::new(BufferType::Original, 0, 3, vec![0]);
         let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0, 2]);
         assert_eq!(buffer.node_list.left_list(), [node_0, node_1]);
@@ -749,7 +748,6 @@ mod buffer_tests {
         cursor.original_line_offset = 0;
 
         buffer.move_cursor_left(&mut cursor);
-
 
         let node_0 = BufferNode::new(BufferType::Original, 0, 3, vec![0, 2]);
         let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0, 2]);
@@ -814,7 +812,6 @@ mod buffer_tests {
 
         buffer.move_cursor_left(&mut cursor);
 
-
         let node_0 = BufferNode::new(BufferType::Original, 0, 3, vec![0]);
         let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
         let node_2 = BufferNode::new(BufferType::Added, 3, 3, vec![0, 2]);
@@ -847,7 +844,6 @@ mod buffer_tests {
         cursor.original_line_offset = 0;
 
         buffer.move_cursor_left(&mut cursor);
-
 
         let node_0 = BufferNode::new(BufferType::Original, 0, 3, vec![0, 2]);
         let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
@@ -1212,7 +1208,6 @@ mod buffer_tests {
         buffer.insert(&mut cursor, 'b');
         buffer.move_cursor_right(&mut cursor);
         buffer.insert(&mut cursor, 'c');
-
 
         assert_eq!(buffer.original_str, stov(""), "original_str mismatch");
         assert_eq!(buffer.added_str, stov("abc"), "added_str mismatch");
