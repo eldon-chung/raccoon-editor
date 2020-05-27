@@ -766,6 +766,37 @@ mod buffer_tests {
     }
 
     #[test]
+    fn move_cursor_left_across_newline_at_start_with_node_before() {
+        let mut buffer = Buffer::with_contents(String::from("abc"));
+        let mut cursor = Cursor::new();
+        cursor.node_offset = 3;
+        cursor.line_idx = 0;
+        cursor.line_offset = 3;
+        cursor.original_line_offset = 3;
+
+        buffer.insert_str(&mut cursor, String::from("\nef"));
+        cursor.node_offset = 1;
+        cursor.line_idx = 1;
+        cursor.line_offset = 0;
+        cursor.original_line_offset = 0;
+
+        buffer.move_cursor_left(&mut cursor);
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 3, vec![0]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0, 1]);
+        assert_eq!(buffer.node_list.left_list(), [node_0, node_1]);
+        assert_eq!(buffer.node_list.right_list(), []);
+
+        assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch");
+        assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch");
+        assert_eq!(
+            cursor.original_line_offset, cursor.line_offset,
+            "original_line_offset not equals to line_offset!"
+        );
+    }
+
+    #[test]
     fn move_cursor_left_across_newline_multiple_nodes_before() {
         let mut buffer = Buffer::with_contents(String::from("abc"));
         let mut cursor = Cursor::new();

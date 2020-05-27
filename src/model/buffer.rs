@@ -413,10 +413,6 @@ impl Buffer {
         }
     }
 
-    pub fn remove_word(&mut self, cursor: &mut Cursor) -> char {
-        todo!();
-    }
-
     pub fn as_str(&self) -> String {
         // construct a serialised string by iterating through the nodes
         //  and copying the contents that they refer to based on
