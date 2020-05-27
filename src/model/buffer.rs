@@ -428,9 +428,7 @@ impl Buffer {
             })
     }
 
-    pub fn move_cursor_up(&self, cursor: &mut Cursor) {
-        
-    }
+    pub fn move_cursor_up(&self, cursor: &mut Cursor) {}
 
     pub fn move_cursor_down(&self, cursor: &mut Cursor) {
         todo!();
