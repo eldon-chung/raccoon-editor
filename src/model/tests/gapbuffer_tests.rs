@@ -1,5 +1,6 @@
 #[cfg(test)]
-mod buffer_tests {
+mod gapbuffer_tests {
     use super::super::*;
 
+    
 }
