@@ -142,7 +142,8 @@ impl Buffer {
             right_line_offsets.insert(0, 0);
 
             // construct left and right nodes
-            let left_node = BufferNode::new(from, index, self.cursor.node_offset, left_line_offsets);
+            let left_node =
+                BufferNode::new(from, index, self.cursor.node_offset, left_line_offsets);
             let right_node = BufferNode::new(
                 from,
                 index + self.cursor.node_offset,
@@ -208,7 +209,6 @@ impl Buffer {
             let new_node = BufferNode::new(new_from, new_index, new_offset, new_line_offsets);
             self.node_list.remove_prev();
 
-
             if new_offset > 0 {
                 // previous node should not be empty after removal
                 //  add new_node to list
@@ -227,7 +227,7 @@ impl Buffer {
                 let mut to_add: usize = 0;
                 for idx in (0..self.node_list.index()).rev() {
                     to_add += self.node_list.get(idx).offset()
-                                - self.node_list.get(idx).last_line_offset();
+                        - self.node_list.get(idx).last_line_offset();
                     if self.node_list.get(idx).has_newline() {
                         break;
                     }
@@ -298,8 +298,8 @@ impl Buffer {
 
                 let mut to_add: usize = 0;
                 for idx in (0..=self.node_list.index()).rev() {
-                    to_add +=
-                        self.node_list.get(idx).offset() - self.node_list.get(idx).last_line_offset();
+                    to_add += self.node_list.get(idx).offset()
+                        - self.node_list.get(idx).last_line_offset();
                     if self.node_list.get(idx).has_newline() {
                         break;
                     }
@@ -367,7 +367,8 @@ impl Buffer {
 
                 let mut to_add: usize = 0;
                 for idx in (0..self.node_list.index()).rev() {
-                    to_add += self.node_list.get(idx).offset() - self.node_list.get(idx).last_line_offset();
+                    to_add += self.node_list.get(idx).offset()
+                        - self.node_list.get(idx).last_line_offset();
                     if self.node_list.get(idx).has_newline() {
                         break;
                     }
@@ -386,18 +387,16 @@ impl Buffer {
         // construct a serialised string by iterating through the nodes
         //  and copying the contents that they refer to based on
         //  their indices and offsets and which string they refer to
-        self.node_list
-            .iter()
-            .fold(String::new(), |mut acc, node| {
-                let source = match node.from() {
-                    BufferType::Original => &self.original_str,
-                    BufferType::Added => &self.added_str,
-                };
-                let slice = &source[node.index()..node.index() + node.offset()];
-                let chunk = str::from_utf8(slice).unwrap();
-                acc.push_str(chunk);
-                acc
-            })
+        self.node_list.iter().fold(String::new(), |mut acc, node| {
+            let source = match node.from() {
+                BufferType::Original => &self.original_str,
+                BufferType::Added => &self.added_str,
+            };
+            let slice = &source[node.index()..node.index() + node.offset()];
+            let chunk = str::from_utf8(slice).unwrap();
+            acc.push_str(chunk);
+            acc
+        })
     }
 
     pub fn move_cursor_up(&mut self) {
@@ -450,7 +449,8 @@ impl Buffer {
                     //  starting from the previous node
                     let mut to_add: usize = self.cursor.node_offset;
                     for idx in (0..self.node_list.index()).rev() {
-                        to_add += self.node_list.get(idx).offset() - self.node_list.get(idx).last_line_offset();
+                        to_add += self.node_list.get(idx).offset()
+                            - self.node_list.get(idx).last_line_offset();
                         if self.node_list.get(idx).last_line_offset() != 0 {
                             break;
                         }
@@ -487,7 +487,8 @@ impl Buffer {
                     //  starting from the previous node get the offset
                     let mut to_add: usize = self.cursor.node_offset;
                     for idx in (0..self.node_list.index()).rev() {
-                        to_add += self.node_list.get(idx).offset() - self.node_list.get(idx).last_line_offset();
+                        to_add += self.node_list.get(idx).offset()
+                            - self.node_list.get(idx).last_line_offset();
                         if self.node_list.get(idx).last_line_offset() != 0 {
                             break;
                         }
@@ -511,8 +512,7 @@ impl Buffer {
             return;
         }
 
-        if self.node_list.at_tail()
-            && self.cursor.node_offset == self.node_list.get_curr().offset()
+        if self.node_list.at_tail() && self.cursor.node_offset == self.node_list.get_curr().offset()
         {
             // cursor should be pointing at the last position in the buffer
             //  so there should be nothing to do but return

@@ -16,7 +16,12 @@ pub struct BufferNode {
 }
 
 impl BufferNode {
-    pub fn new(from: BufferType, index: usize, offset: usize, line_offsets: Vec<usize>) -> BufferNode {
+    pub fn new(
+        from: BufferType,
+        index: usize,
+        offset: usize,
+        line_offsets: Vec<usize>,
+    ) -> BufferNode {
         BufferNode {
             from,
             index,
@@ -254,5 +259,3 @@ impl PartialEq<Vec<BufferNode>> for NodeList {
         true
     }
 }
-
-
