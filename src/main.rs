@@ -106,14 +106,14 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('s'),
             ..
         } => {
-            app.set_app_mode(AppMode::Command(CommandMode::Write));
+            app.enter_write_mode();
             Ok(QuitOption::NotQuitting)
         }
         Event::Input {
             key: Key::Ctrl('o'),
             ..
         } => {
-            app.set_app_mode(AppMode::Command(CommandMode::Read));
+            app.enter_read_mode();
             Ok(QuitOption::NotQuitting)
         }
         _ => Ok(QuitOption::NotQuitting),

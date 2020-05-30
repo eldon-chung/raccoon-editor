@@ -142,6 +142,18 @@ impl App {
         self.set_app_mode(AppMode::Edit);
     }
 
+    pub fn enter_write_mode(&mut self) {
+        // Reset cursor to start
+        self.cursor_main = Cursor::new();
+        self.set_app_mode(AppMode::Command(CommandMode::Write));
+    }
+
+    pub fn enter_read_mode(&mut self) {
+        // Reset cursor to start
+        self.cursor_main = Cursor::new();
+        self.set_app_mode(AppMode::Command(CommandMode::Read));
+    }
+
     fn init_new_file(filepath: String) {
         let _file = match File::create(filepath) {
             Err(e) => panic!("{}", e),
