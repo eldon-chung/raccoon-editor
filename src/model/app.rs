@@ -54,9 +54,23 @@ impl App {
     }
 
     pub fn get_text_as_iter(&self) -> Vec<String> {
+        vec![self.buffer.as_str()]
+    }
+
+    // Originally implemented with get_text_as_iter using a match depending on the app_mode
+    // but decided to separate it out and write another method because accessing a buffer
+    // should be independent of app_mode.
+    // We can discuss the naming of this method if required
+    pub fn get_command_buffer_text_as_iter(&self) -> Vec<String> {
+        vec![self.command_buffer.as_str()]
+    }
+
+    // This method was written to make the View as "dumb" as possible
+    // The App will handle which text is to be shown
+    pub fn get_text_based_on_mode(&self) -> Vec<String> {
         match self.app_mode() {
-            AppMode::Edit => vec![self.buffer.as_str()],
-            AppMode::Command(_) => vec![self.command_buffer.as_str()],
+            AppMode::Edit => self.get_text_as_iter(),
+            AppMode::Command(_) => self.get_command_buffer_text_as_iter()
         }
     }
 
@@ -91,24 +105,25 @@ impl App {
     pub fn save_file(&mut self) {
         assert!(self.app_mode() == AppMode::Command(CommandMode::Write));
 
-        // Get from the command_buffer
-        let filename = self.get_text_as_iter().join("");
+        let file_path = self.get_command_buffer_text_as_iter().join("");
 
-        // Get from the normal buffer
-        self.set_app_mode(AppMode::Edit);
+        // Get from normal buffer
         let text_to_save = self.get_text_as_iter().join("");
 
-        fs::write(filename, text_to_save).expect("Unable to write file");
+        fs::write(file_path, text_to_save).expect("Unable to write file");
+
+        // The current implementation will quit after saving. This is here
+        // for the time when we are going to implement saving without quitting
+        self.set_app_mode(AppMode::Edit);
     }
 
     pub fn open_file(&mut self) {
         assert!(self.app_mode() == AppMode::Command(CommandMode::Read));
 
-        // Get from the command_buffer
-        let filename = self.get_text_as_iter().join("");
+        let file_path = self.get_command_buffer_text_as_iter().join("");
 
         // Get contents from file, and initialise buffer with those contents
-        let data = fs::read_to_string(filename).expect("Unable to read file");
+        let data = fs::read_to_string(file_path).expect("Unable to read file");
         self.buffer = Buffer::with_contents(data);
 
         // Enter editing mode after this

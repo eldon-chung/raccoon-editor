@@ -24,7 +24,7 @@ mod app_tests {
 
         app.open_file();
 
-        let opened_text = vec![app.buffer.as_str()].join("");
+        let opened_text = app.get_text_as_iter().join("");
         assert_eq!(opened_text, "Testing Read!");
         dir.close()?;
 

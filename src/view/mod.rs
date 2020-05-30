@@ -22,8 +22,10 @@ impl<B: Backend> View<B> {
     }
 
     pub fn update_display(&mut self, app: &App) -> Result<(), io::Error> {
-        let text = app.get_text_as_iter(); // Get a copy of the text to be rendered
-                                           // For now let's not do anything fancy formatting
+        // Get a copy of the text to be rendered
+        // For now let's not do anything fancy formatting
+        let text = app.get_text_based_on_mode();
+
         let text: Vec<_> = text.iter().map(|x| Text::raw(x)).collect();
 
         let title = match app.app_mode() {
