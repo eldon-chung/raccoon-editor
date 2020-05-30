@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod app_tests {
     use super::super::*;
-    use tempfile::tempdir;
     use std::fs::File;
     use std::io::{self, Write};
+    use tempfile::tempdir;
 
     #[test]
     fn open_file_sucess() -> io::Result<()> {

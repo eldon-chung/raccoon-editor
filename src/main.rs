@@ -78,7 +78,7 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
                 app.add_char('\n');
                 Ok(QuitOption::NotQuitting)
             }
-        }
+        },
         Event::Input {
             key: Key::Char(c), ..
         } => {
