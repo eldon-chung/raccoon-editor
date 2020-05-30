@@ -66,6 +66,13 @@ mod app_tests {
         let opened_text = app.get_text_as_iter().join("");
         assert_eq!(opened_text, ""); // There should be nothing
 
+        let app_cursor = app.cursor_main();
+        let expected_cursor = Cursor::new();
+        assert_eq!(app_cursor.node_idx, expected_cursor.node_idx);
+        assert_eq!(app_cursor.node_offset, expected_cursor.node_offset);
+        assert_eq!(app_cursor.line_idx, expected_cursor.line_idx);
+        assert_eq!(app_cursor.line_offset, expected_cursor.line_offset);
+
         dir.close()?;
         Ok(())
     }

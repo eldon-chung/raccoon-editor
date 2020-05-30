@@ -135,6 +135,9 @@ impl App {
         };
         self.buffer = Buffer::with_contents(contents);
 
+        // Reset cursor to the start of file
+        self.cursor_main = Cursor::new();
+
         // Enter editing mode after this
         self.set_app_mode(AppMode::Edit);
     }
