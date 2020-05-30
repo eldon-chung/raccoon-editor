@@ -89,6 +89,8 @@ impl App {
     }
 
     pub fn save_file(&mut self) {
+        assert!(self.app_mode() == AppMode::Command(CommandMode::Write));
+
         // Get from the command_buffer
         let filename = self.get_text_as_iter().join("");
 
@@ -100,6 +102,8 @@ impl App {
     }
 
     pub fn open_file(&mut self) {
+        assert!(self.app_mode() == AppMode::Command(CommandMode::Read));
+
         // Get from the command_buffer
         let filename = self.get_text_as_iter().join("");
 
@@ -111,3 +115,7 @@ impl App {
         self.set_app_mode(AppMode::Edit);
     }
 }
+
+#[cfg(test)]
+#[path = "tests/app_tests.rs"]
+mod app_tests;
