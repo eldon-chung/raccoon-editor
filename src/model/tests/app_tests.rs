@@ -42,7 +42,10 @@ mod app_tests {
         app.open_file();
 
         let opened_text = app.get_text_as_iter().join("");
-        assert_eq!(opened_text, "Testing Read!", "Mismatch between opened text and what is in the buffer");
+        assert_eq!(
+            opened_text, "Testing Read!",
+            "Mismatch between opened text and what is in the buffer"
+        );
 
         dir.close()?;
         Ok(())
@@ -62,7 +65,10 @@ mod app_tests {
 
         app.open_file();
 
-        assert!(Path::new(&file_path_string).exists(), "A new file is not created");
+        assert!(
+            Path::new(&file_path_string).exists(),
+            "A new file is not created"
+        );
         let opened_text = app.get_text_as_iter().join("");
         assert_eq!(opened_text, ""); // There should be nothing
 
@@ -92,7 +98,10 @@ mod app_tests {
         app.save_file();
 
         let saved_text = fs::read_to_string(file_path)?;
-        assert_eq!(saved_text, "Testing Write!", "Mismatch between the text that has been saved and what was in the buffer");
+        assert_eq!(
+            saved_text, "Testing Write!",
+            "Mismatch between the text that has been saved and what was in the buffer"
+        );
 
         dir.close()?;
         Ok(())
