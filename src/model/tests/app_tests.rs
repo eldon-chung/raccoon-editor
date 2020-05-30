@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod app_tests {
     use super::super::*;
-    use std::path::Path;
     use std::fs::File;
     use std::io::{self, Write};
+    use std::path::Path;
     use tempfile::tempdir;
 
     #[test]
