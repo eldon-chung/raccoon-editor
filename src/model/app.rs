@@ -10,9 +10,10 @@ pub enum AppMode {
     // IMPORTANT: Change boolean to hold an enum in the future
     // Having difficulties with the traits
     // Write = true, Read = false
-    Command(bool),
+    Command(CommandMode),
 }
 
+#[derive(Copy, Clone, PartialEq)]
 pub enum CommandMode {
     Read,  // opening a file
     Write, // saving a file

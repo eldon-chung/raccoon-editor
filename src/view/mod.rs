@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::model::app::{App, AppMode};
+use crate::model::app::{App, AppMode, CommandMode};
 #[allow(unused_imports)]
 use tui::{
     backend::{Backend, TermionBackend},
@@ -27,8 +27,8 @@ impl<B: Backend> View<B> {
         let text: Vec<_> = text.iter().map(|x| Text::raw(x)).collect();
 
         let title = match app.app_mode() {
-            AppMode::Command(true) => "Command mode: Saving into file",
-            AppMode::Command(false) => "Command mode: Opening a file",
+            AppMode::Command(CommandMode::Write) => "Command mode: Saving into file",
+            AppMode::Command(CommandMode::Read) => "Command mode: Opening a file",
             AppMode::Edit => "Edit mode",
         };
 
