@@ -60,6 +60,26 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             ..
         } => Ok(QuitOption::Quitting),
         Event::Input {
+            key: Key::Char('\n'),
+            ..
+        } => match app.app_mode() {
+            // If in command mode, pressing enter means you want
+            // to enter the command
+            AppMode::Command(CommandMode::Write) => {
+                app.save_file();
+                Ok(QuitOption::Quitting)
+            }
+            AppMode::Command(CommandMode::Read) => {
+                app.open_file();
+                Ok(QuitOption::NotQuitting)
+            }
+            _ => {
+                // in Edit mode, it means you want to insert the newline character
+                app.add_char('\n');
+                Ok(QuitOption::NotQuitting)
+            }
+        }
+        Event::Input {
             key: Key::Char(c), ..
         } => {
             app.add_char(c);
@@ -96,21 +116,6 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             app.set_app_mode(AppMode::Command(CommandMode::Read));
             Ok(QuitOption::NotQuitting)
         }
-        Event::Input {
-            // change this
-            key: Key::Ctrl('n'),
-            ..
-        } => match app.app_mode() {
-            AppMode::Command(CommandMode::Write) => {
-                app.save_file();
-                Ok(QuitOption::Quitting)
-            }
-            AppMode::Command(CommandMode::Read) => {
-                app.open_file();
-                Ok(QuitOption::NotQuitting)
-            }
-            _ => Ok(QuitOption::NotQuitting),
-        },
         _ => Ok(QuitOption::NotQuitting),
     }
 }
