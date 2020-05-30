@@ -79,10 +79,11 @@ impl NodeList {
     }
 
     pub fn with_contents(mut contents: Vec<BufferNode>) -> NodeList {
-        let left_list: VecDeque<_> = contents.drain(..).collect();
+        let left_list: VecDeque<_> = contents.drain(..=0).collect();
+        let right_list: VecDeque<_> = contents.drain(..).collect();
         NodeList {
             left_list: left_list,
-            right_list: VecDeque::new(),
+            right_list: right_list,
         }
     }
 
@@ -177,7 +178,7 @@ impl NodeList {
         self.left_list.push_back(element);
     }
 
-    pub fn remove_after(&mut self) {
+    pub fn remove_next(&mut self) {
         self.right_list.pop_front();
     }
 
@@ -186,7 +187,7 @@ impl NodeList {
     }
 
     pub fn at_tail(&self) -> bool {
-        return self.right_list.len() == 1;
+        return self.right_list.len() == 0 && !self.is_empty();
     }
 
     pub fn move_left(&mut self) {
@@ -204,7 +205,7 @@ impl NodeList {
         }
 
         let element = self.right_list.pop_front().unwrap();
-        self.left_list.push_front(element);
+        self.left_list.push_back(element);
     }
 
     pub fn get(&self, index: usize) -> &BufferNode {
@@ -259,3 +260,7 @@ impl PartialEq<Vec<BufferNode>> for NodeList {
         true
     }
 }
+
+#[cfg(test)]
+#[path = "tests/nodelist_tests.rs"]
+mod node_list_tests;
