@@ -42,7 +42,7 @@ mod app_tests {
         app.open_file();
 
         let opened_text = app.get_text_as_iter().join("");
-        assert_eq!(opened_text, "Testing Read!");
+        assert_eq!(opened_text, "Testing Read!", "Mismatch between opened text and what is in the buffer");
 
         dir.close()?;
         Ok(())
@@ -62,16 +62,15 @@ mod app_tests {
 
         app.open_file();
 
-        assert!(Path::new(&file_path_string).exists());
+        assert!(Path::new(&file_path_string).exists(), "A new file is not created");
         let opened_text = app.get_text_as_iter().join("");
         assert_eq!(opened_text, ""); // There should be nothing
 
         let app_cursor = app.cursor_main();
-        let expected_cursor = Cursor::new();
-        assert_eq!(app_cursor.node_idx, expected_cursor.node_idx);
-        assert_eq!(app_cursor.node_offset, expected_cursor.node_offset);
-        assert_eq!(app_cursor.line_idx, expected_cursor.line_idx);
-        assert_eq!(app_cursor.line_offset, expected_cursor.line_offset);
+        assert_eq!(app_cursor.node_idx, 0, "app_cursor.node_idx mismatch");
+        assert_eq!(app_cursor.node_offset, 0, "app_cursor.node_offset mismatch");
+        assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
+        assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
 
         dir.close()?;
         Ok(())
@@ -93,7 +92,7 @@ mod app_tests {
         app.save_file();
 
         let saved_text = fs::read_to_string(file_path)?;
-        assert_eq!(saved_text, "Testing Write!");
+        assert_eq!(saved_text, "Testing Write!", "Mismatch between the text that has been saved and what was in the buffer");
 
         dir.close()?;
         Ok(())
