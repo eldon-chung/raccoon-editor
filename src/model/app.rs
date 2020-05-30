@@ -2,7 +2,9 @@ use crate::utils::Cursor;
 
 use super::buffer::Buffer;
 
+use std::fs::File;
 use std::fs;
+use std::io::ErrorKind;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {
@@ -123,11 +125,25 @@ impl App {
         let file_path = self.get_command_buffer_text_as_iter().join("");
 
         // Get contents from file, and initialise buffer with those contents
-        let data = fs::read_to_string(file_path).expect("Unable to read file");
-        self.buffer = Buffer::with_contents(data);
+        let contents = match fs::read_to_string(&file_path) {
+            Ok(contents) => contents,
+            Err(ref e) if e.kind() == ErrorKind::NotFound => {
+                App::init_new_file(file_path);
+                String::new()
+            },
+            Err(e) => panic!("{}", e)
+        };
+        self.buffer = Buffer::with_contents(contents);
 
         // Enter editing mode after this
         self.set_app_mode(AppMode::Edit);
+    }
+
+    fn init_new_file(filepath : String) {
+        let _file = match File::create(filepath) {
+            Err(e) => panic!("{}", e),
+            Ok(f) => f,
+        };
     }
 }
 
