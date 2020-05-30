@@ -162,6 +162,8 @@ impl App {
     }
 }
 
+/*
 #[cfg(test)]
 #[path = "tests/app_tests.rs"]
 mod app_tests;
+*/
