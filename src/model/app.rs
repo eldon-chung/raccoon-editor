@@ -56,35 +56,35 @@ impl App {
     pub fn get_text_as_iter(&self) -> Vec<String> {
         match self.app_mode() {
             AppMode::Edit => vec![self.buffer.as_str()],
-            AppMode::Command(cm) => vec![self.command_buffer.as_str()],
+            AppMode::Command(_) => vec![self.command_buffer.as_str()],
         }
     }
 
     pub fn add_char(&mut self, c: char) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.insert(&mut self.cursor_main, c),
-            AppMode::Command(cm) => self.command_buffer.insert(&mut self.cursor_main, c),
+            AppMode::Command(_) => self.command_buffer.insert(&mut self.cursor_main, c),
         }
     }
 
     pub fn remove_char(&mut self) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.remove(&mut self.cursor_main),
-            AppMode::Command(cm) => self.command_buffer.remove(&mut self.cursor_main),
+            AppMode::Command(_) => self.command_buffer.remove(&mut self.cursor_main),
         }
     }
 
     pub fn move_cursor_left(&mut self) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.move_cursor_left(&mut self.cursor_main),
-            AppMode::Command(cm) => self.command_buffer.move_cursor_left(&mut self.cursor_main),
+            AppMode::Command(_) => self.command_buffer.move_cursor_left(&mut self.cursor_main),
         }
     }
 
     pub fn move_cursor_right(&mut self) {
         match self.app_mode() {
             AppMode::Edit => self.buffer.move_cursor_right(&mut self.cursor_main),
-            AppMode::Command(cm) => self.command_buffer.move_cursor_right(&mut self.cursor_main),
+            AppMode::Command(_) => self.command_buffer.move_cursor_right(&mut self.cursor_main),
         }
     }
 
