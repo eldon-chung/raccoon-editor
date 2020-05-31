@@ -110,7 +110,7 @@ mod app_tests {
     #[test]
     fn enter_write_mode_test() {
         let mut app = App::new();
-        app.enter_write_mode();
+        app.enter_command_write_mode();
 
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
         let app_cursor = app.cursor_main();
@@ -123,7 +123,7 @@ mod app_tests {
     #[test]
     fn enter_read_mode_test() {
         let mut app = App::new();
-        app.enter_read_mode();
+        app.enter_command_read_mode();
 
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Read));
         let app_cursor = app.cursor_main();
