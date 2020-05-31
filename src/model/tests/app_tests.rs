@@ -119,7 +119,7 @@ mod app_tests {
         assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
         assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
     }
-    
+
     #[test]
     fn enter_read_mode_test() {
         let mut app = App::new();
