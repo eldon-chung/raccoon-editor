@@ -67,6 +67,14 @@ impl Buffer {
         }
     }
 
+    pub fn current_line(&self) -> usize {
+        self.current_line
+    }
+
+    pub fn num_newlines(&self) -> usize {
+        self.num_newlines
+    }
+
     pub fn insert(&mut self, ch: char) {
         let mut string = String::new();
         string.push(ch);
