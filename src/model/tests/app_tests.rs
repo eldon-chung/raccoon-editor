@@ -106,4 +106,30 @@ mod app_tests {
         dir.close()?;
         Ok(())
     }
+
+    #[test]
+    fn enter_write_mode_test() {
+        let mut app = App::new();
+        app.enter_write_mode();
+
+        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
+        let app_cursor = app.cursor_main();
+        assert_eq!(app_cursor.node_idx, 0, "app_cursor.node_idx mismatch");
+        assert_eq!(app_cursor.node_offset, 0, "app_cursor.node_offset mismatch");
+        assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
+        assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
+    }
+    
+    #[test]
+    fn enter_read_mode_test() {
+        let mut app = App::new();
+        app.enter_read_mode();
+
+        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Read));
+        let app_cursor = app.cursor_main();
+        assert_eq!(app_cursor.node_idx, 0, "app_cursor.node_idx mismatch");
+        assert_eq!(app_cursor.node_offset, 0, "app_cursor.node_offset mismatch");
+        assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
+        assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
+    }
 }

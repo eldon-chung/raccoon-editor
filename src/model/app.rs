@@ -6,7 +6,7 @@ use std::fs;
 use std::fs::File;
 use std::io::ErrorKind;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum AppMode {
     Edit,
     // IMPORTANT: Change boolean to hold an enum in the future
@@ -15,7 +15,7 @@ pub enum AppMode {
     Command(CommandMode),
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum CommandMode {
     Read,  // opening a file
     Write, // saving a file
