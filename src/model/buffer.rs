@@ -3,6 +3,16 @@ use std::str;
 use super::nodelist::*;
 use crate::utils::cursor::Cursor;
 
+macro_rules! min {
+    ($x:expr, $y:expr) => {
+        if $x < $y {
+            $x
+        } else {
+            $y
+        };
+    };
+}
+
 pub struct Buffer {
     cursor: Cursor,
     original_str: Vec<u8>,
@@ -489,7 +499,93 @@ impl Buffer {
     }
 
     pub fn move_cursor_down(&mut self) {
-        todo!();
+        if self.current_line == self.num_newlines {
+            return;
+        }
+
+        self.current_line += 1;
+
+        if self.cursor.line_idx == self.node_list.get_curr().line_offsets_len() - 1 {
+            self.node_list.move_to_next_newline();
+            self.cursor.line_idx = 0;
+        }
+
+        if self.cursor.line_idx + 1 == self.node_list.get_curr().line_offsets_len() - 1 {
+            // second last
+            let mut remaining_offset = self.cursor.original_line_offset;
+            let max_line_offset =
+                self.node_list.get_curr().offset() - self.node_list.get_curr().last_line_offset();
+            if remaining_offset < max_line_offset || self.node_list.at_tail() {
+                self.cursor.node_offset = min!(
+                    self.node_list.get_curr().last_line_offset() + remaining_offset,
+                    self.node_list.get_curr().offset()
+                );
+                self.cursor.line_offset = min!(
+                    remaining_offset,
+                    self.node_list.get_curr().offset()
+                        - self.node_list.get_curr().last_line_offset()
+                );
+                self.cursor.line_idx = self.node_list.get_curr().line_offsets_len() - 1;
+                return;
+            }
+
+            remaining_offset -= max_line_offset;
+            self.cursor.line_offset = max_line_offset;
+            self.node_list.move_right();
+
+            let mut max_line_offset = if self.node_list.get_curr().has_newline() {
+                self.node_list.get_curr().line_offset_at(1)
+            } else {
+                self.node_list.get_curr().offset()
+            };
+
+            while remaining_offset >= max_line_offset
+                && !self.node_list.at_tail()
+                && !self.node_list.get_curr().has_newline()
+            {
+                self.cursor.line_offset += max_line_offset;
+                remaining_offset -= max_line_offset;
+                self.node_list.move_right();
+                max_line_offset = if self.node_list.get_curr().has_newline() {
+                    self.node_list.get_curr().line_offset_at(1)
+                } else {
+                    self.node_list.get_curr().offset()
+                };
+            }
+
+            let max_line_offset = if self.node_list.get_curr().has_newline() {
+                self.node_list.get_curr().line_offset_at(1) - 1
+            } else {
+                self.node_list.get_curr().offset()
+            };
+            let to_add = min!(remaining_offset, max_line_offset);
+            self.cursor.node_offset = to_add;
+            self.cursor.line_offset += to_add;
+            self.cursor.line_idx = 0;
+        } else {
+            // before second last
+            assert!(self.cursor.line_idx + 2 <= self.node_list.get_curr().line_offsets_len() - 1);
+            self.cursor.line_idx += 1;
+            let max_line_offset = self
+                .node_list
+                .get_curr()
+                .line_offset_at(self.cursor.line_idx + 1)
+                - self
+                    .node_list
+                    .get_curr()
+                    .line_offset_at(self.cursor.line_idx)
+                - 1;
+            self.cursor.line_offset = if max_line_offset < self.cursor.original_line_offset {
+                max_line_offset
+            } else {
+                self.cursor.original_line_offset
+            };
+            self.cursor.node_offset = self.cursor.line_offset
+                + self
+                    .node_list
+                    .get_curr()
+                    .line_offset_at(self.cursor.line_idx);
+        }
     }
 
     pub fn move_cursor_left(&mut self) {
