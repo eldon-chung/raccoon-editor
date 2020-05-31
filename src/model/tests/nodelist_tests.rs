@@ -515,4 +515,30 @@ mod node_list_tests {
         let node_list = NodeList::with_contents(vec![node_0, node_1]);
         assert_eq!(node_list, vec![node_0_copy, node_1_copy]);
     }
+
+    #[test]
+    fn move_to_prev_newline() {
+        let node_0 = BufferNode::new(BufferType::Original, 0, 0, vec![0]);
+        let node_1 = BufferNode::new(BufferType::Original, 1, 0, vec![0, 1]);
+        let node_2 = BufferNode::new(BufferType::Original, 1, 0, vec![0]);
+
+        let mut node_list = NodeList::with_contents(vec![node_0, node_1, node_2]);
+        node_list.move_right();
+        node_list.move_right();
+
+        node_list.move_to_prev_newline();
+        assert_eq!(node_list.index(), 1);
+    }
+
+    #[test]
+    fn move_to_next_newline() {
+        let node_0 = BufferNode::new(BufferType::Original, 0, 0, vec![0]);
+        let node_1 = BufferNode::new(BufferType::Original, 1, 0, vec![0, 1]);
+        let node_2 = BufferNode::new(BufferType::Original, 1, 0, vec![0]);
+
+        let mut node_list = NodeList::with_contents(vec![node_0, node_1, node_2]);
+
+        node_list.move_to_next_newline();
+        assert_eq!(node_list.index(), 1);
+    }
 }

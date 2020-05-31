@@ -243,6 +243,20 @@ impl NodeList {
     pub fn iter_from_after_curr(&self) -> impl Iterator<Item = &BufferNode> {
         self.right_list.iter()
     }
+
+    pub fn move_to_prev_newline(&mut self) {
+        self.move_left();
+        while !self.get_curr().has_newline() && !self.at_head() {
+            self.move_left();
+        }
+    }
+
+    pub fn move_to_next_newline(&mut self) {
+        self.move_right();
+        while !self.get_curr().has_newline() && !self.at_tail() {
+            self.move_right();
+        }
+    }
 }
 
 impl PartialEq<Vec<BufferNode>> for NodeList {
