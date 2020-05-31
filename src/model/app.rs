@@ -1,6 +1,5 @@
-use crate::utils::cursor::Cursor;
-
 use super::buffer::Buffer;
+use super::cursor::Cursor;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {

@@ -1,7 +1,7 @@
 use std::str;
 
+use super::cursor::Cursor;
 use super::nodelist::*;
-use crate::utils::cursor::Cursor;
 
 macro_rules! min {
     ($x:expr, $y:expr) => {
