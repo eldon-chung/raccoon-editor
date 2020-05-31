@@ -1204,4 +1204,365 @@ mod buffer_tests {
 
         assert_eq!(buffer.current_line, 1, "buffer.current_line mismatch!");
     }
+
+    #[test]
+    fn move_cursor_up_on_empty_buffer() {
+        let mut buffer = Buffer::new();
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 0, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, cursor.line_offset,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(buffer.original_str, stov(""), "original_str mismatch!");
+        assert_eq!(buffer.added_str, stov(""), "added_str mismatch!");
+        assert_eq!(buffer.node_list, vec![], "node_list contents mismatch!");
+        assert!(buffer.node_list.is_empty(), "node_list is not empty!");
+        assert_eq!(buffer.current_line, 0, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_same_node() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc\nefg"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 3, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 1, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 3,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbc\nefg"),
+            "original_str mismatch!"
+        );
+        assert_eq!(buffer.added_str, stov(""), "added_str mismatch!");
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 4]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 0, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 1, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_previous_node_index_1() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc\nefg"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.insert_str(String::from("hij"));
+        buffer.insert_str(String::from("k\nmno"));
+
+        buffer.current_line = 3;
+        buffer.cursor.node_offset = 4;
+        buffer.cursor.line_offset = 2;
+        buffer.cursor.original_line_offset = 2;
+        buffer.cursor.line_idx = 1;
+
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 6, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 2, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 2,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbc\nefg"),
+            "original_str mismatch!"
+        );
+        assert_eq!(buffer.added_str, stov("hijk\nmno"), "added_str mismatch!");
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 4]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
+        let node_2 = BufferNode::new(BufferType::Added, 3, 5, vec![0, 2]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 0, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 2, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_previous_node_index_1_into_next_node() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc\nefg"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.insert_str(String::from("hij"));
+        buffer.insert_str(String::from("k\nmno"));
+
+        buffer.current_line = 3;
+        buffer.cursor.node_offset = 5;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 1;
+
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 3, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 3,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbc\nefg"),
+            "original_str mismatch!"
+        );
+        assert_eq!(buffer.added_str, stov("hijk\nmno"), "added_str mismatch!");
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 4]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
+        let node_2 = BufferNode::new(BufferType::Added, 3, 5, vec![0, 2]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 1, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 2, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_previous_node_index_1_into_original_node() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc\nefg"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.insert_str(String::from("hij"));
+        buffer.insert_str(String::from("k\nmnopqrstuv"));
+        assert_eq!(buffer.cursor.original_line_offset, 10);
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 7, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 10,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbc\nefg"),
+            "original_str mismatch!"
+        );
+        assert_eq!(
+            buffer.added_str,
+            stov("hijk\nmnopqrstuv"),
+            "added_str mismatch!"
+        );
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 4]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
+        let node_2 = BufferNode::new(BufferType::Added, 3, 12, vec![0, 2]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 2, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 2, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_previous_node_index_0_into_original_node() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc\nefg"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.insert_str(String::from("hij"));
+        buffer.insert_str(String::from("k\nmnopqrstuv"));
+        assert_eq!(buffer.cursor.original_line_offset, 10);
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 1;
+        buffer.cursor.line_offset = 7;
+        buffer.cursor.original_line_offset = 7;
+        buffer.cursor.line_idx = 0;
+
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 3, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 1, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 7,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbc\nefg"),
+            "original_str mismatch!"
+        );
+        assert_eq!(
+            buffer.added_str,
+            stov("hijk\nmnopqrstuv"),
+            "added_str mismatch!"
+        );
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 4]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0]);
+        let node_2 = BufferNode::new(BufferType::Added, 3, 12, vec![0, 2]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 0, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 1, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_previous_node_index_0_into_middle_node() {
+        let mut buffer = Buffer::with_contents(String::from("\nbcde\ng"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.insert_str(String::from("h\nj"));
+        buffer.insert_str(String::from("kl\nnopqrstuv"));
+        buffer.current_line = 3;
+        buffer.cursor.node_offset = 2;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 0;
+
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 2, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 3,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbcde\ng"),
+            "original_str mismatch!"
+        );
+        assert_eq!(
+            buffer.added_str,
+            stov("h\njkl\nnopqrstuv"),
+            "added_str mismatch!"
+        );
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 6]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0, 2]);
+        let node_2 = BufferNode::new(BufferType::Added, 3, 12, vec![0, 3]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 1, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 2, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn move_cursor_up_with_newline_in_the_previous_node_index_0_into_start_of_middle_node() {
+        let mut buffer = Buffer::with_contents(String::from("\nbcde\ng"));
+        buffer.current_line = 2;
+        buffer.cursor.node_offset = 7;
+        buffer.cursor.line_offset = 3;
+        buffer.cursor.original_line_offset = 3;
+        buffer.cursor.line_idx = 2;
+
+        buffer.insert_str(String::from("h\nj"));
+        buffer.insert_str(String::from("kl\nnopqrstuv"));
+        buffer.current_line = 3;
+        buffer.cursor.node_offset = 0;
+        buffer.cursor.line_offset = 1;
+        buffer.cursor.original_line_offset = 1;
+        buffer.cursor.line_idx = 0;
+
+        buffer.move_cursor_up();
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch!");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, 1,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(
+            buffer.original_str,
+            stov("\nbcde\ng"),
+            "original_str mismatch!"
+        );
+        assert_eq!(
+            buffer.added_str,
+            stov("h\njkl\nnopqrstuv"),
+            "added_str mismatch!"
+        );
+
+        let node_0 = BufferNode::new(BufferType::Original, 0, 7, vec![0, 1, 6]);
+        let node_1 = BufferNode::new(BufferType::Added, 0, 3, vec![0, 2]);
+        let node_2 = BufferNode::new(BufferType::Added, 3, 12, vec![0, 3]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2],
+            "node_list contents mismatch!"
+        );
+
+        assert_eq!(buffer.node_list.index(), 1, "node_list index mismatch!");
+        assert_eq!(buffer.current_line, 2, "buffer.current_line mismatch!");
+    }
 }
