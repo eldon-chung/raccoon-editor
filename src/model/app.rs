@@ -1,6 +1,5 @@
-use crate::utils::Cursor;
-
 use super::buffer::Buffer;
+use super::cursor::Cursor;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {
@@ -10,7 +9,6 @@ pub enum AppMode {
 
 pub struct App {
     buffer: Buffer,
-    cursor_main: Cursor,
     app_mode: AppMode,
 }
 
@@ -18,7 +16,6 @@ impl App {
     pub fn new() -> App {
         App {
             buffer: Buffer::new(),
-            cursor_main: Cursor::new(),
             app_mode: AppMode::Edit,
         }
     }
@@ -26,10 +23,6 @@ impl App {
     // App should only release immutable references to the buffer?
     pub fn buffer(&self) -> &Buffer {
         &self.buffer
-    }
-
-    pub fn cursor_main(&self) -> &Cursor {
-        &self.cursor_main
     }
 
     pub fn app_mode(&self) -> AppMode {
@@ -41,18 +34,18 @@ impl App {
     }
 
     pub fn add_char(&mut self, c: char) {
-        self.buffer.insert(&mut self.cursor_main, c);
+        self.buffer.insert(c);
     }
 
     pub fn remove_char(&mut self) {
-        self.buffer.remove(&mut self.cursor_main);
+        self.buffer.remove();
     }
 
     pub fn move_cursor_left(&mut self) {
-        self.buffer.move_cursor_left(&mut self.cursor_main);
+        self.buffer.move_cursor_left();
     }
 
     pub fn move_cursor_right(&mut self) {
-        self.buffer.move_cursor_right(&mut self.cursor_main);
+        self.buffer.move_cursor_right();
     }
 }
