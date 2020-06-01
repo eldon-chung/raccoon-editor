@@ -419,6 +419,65 @@ impl Buffer {
         })
     }
 
+    pub fn as_str_split_by_cursors(&self) -> Vec<String> {
+        // construct a serialised string by iterating through the nodes
+        //  and copying the contents that they refer to based on
+        //  their indices and offsets and which string they refer to
+
+        if self.node_list.is_empty() {
+            return vec![String::new()];
+        }
+
+        let left_iter = self.node_list.iter_until_curr();
+        let right_iter = self.node_list.iter_from_after_curr();
+        let mut left_str = String::new();
+        let mut right_str = String::new();
+
+        let mut left_str = left_iter
+            .enumerate()
+            .filter_map(|(i, e)| {
+                if i != self.node_list.index() {
+                    Some(e)
+                } else {
+                    None
+                }
+            })
+            .fold(left_str, |mut acc, node| {
+                let source = match node.from() {
+                    BufferType::Original => &self.original_str,
+                    BufferType::Added => &self.added_str,
+                };
+                let slice = &source[node.index()..node.index() + node.offset()];
+                let chunk = str::from_utf8(slice).unwrap();
+                acc.push_str(chunk);
+                acc
+            });
+        let current_node = self.node_list.get_curr();
+        let source = match current_node.from() {
+            BufferType::Original => &self.original_str,
+            BufferType::Added => &self.added_str,
+        };
+        let slice = &source[current_node.index()..current_node.index() + self.cursor.node_offset];
+        let chunk = str::from_utf8(slice).unwrap();
+        left_str.push_str(chunk);
+
+        let slice = &source[current_node.index() + self.cursor.node_offset..current_node.offset()];
+        let chunk = str::from_utf8(slice).unwrap();
+        right_str.push_str(chunk);
+
+        let right_str = right_iter.fold(right_str, |mut acc, node| {
+            let source = match node.from() {
+                BufferType::Original => &self.original_str,
+                BufferType::Added => &self.added_str,
+            };
+            let slice = &source[node.index()..node.index() + node.offset()];
+            let chunk = str::from_utf8(slice).unwrap();
+            acc.push_str(chunk);
+            acc
+        });
+        vec![left_str, right_str]
+    }
+
     pub fn move_cursor_up(&mut self) {
         if self.current_line == 0 {
             return;

@@ -692,6 +692,36 @@ mod buffer_tests {
         let string = buffer.as_str();
         assert_eq!(string, "\nbcde\nghi");
     }
+
+    #[test]
+    fn as_str_split_by_cursors_on_empty_buffer() {
+        let buffer = Buffer::new();
+        assert_eq!(buffer.as_str_split_by_cursors(), vec![String::from("")]);
+    }
+
+    #[test]
+    fn as_str_split_by_cursors_on_non_empty_buffer() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc"));
+        buffer.current_line = 1;
+        buffer.cursor.node_offset = 3;
+        buffer.cursor.line_offset = 2;
+        buffer.cursor.line_idx = 1;
+        buffer.cursor.original_line_offset = buffer.cursor.line_offset;
+
+        buffer.insert_str(String::from("de\n"));
+        buffer.insert_str(String::from("ghi"));
+
+        buffer.node_list.move_left();
+        buffer.current_line = 1;
+        buffer.cursor.node_offset = 1;
+        buffer.cursor.line_offset = 4;
+        buffer.cursor.line_idx = 0;
+        buffer.cursor.original_line_offset = buffer.cursor.line_offset;
+        let string = buffer.as_str_split_by_cursors();
+
+        assert_eq!(string, vec![String::from("\nbcd"), String::from("e\nghi")]);
+    }
+
     #[test]
     fn move_cursor_left_on_empty_buffer() {
         let mut buffer = Buffer::new();
