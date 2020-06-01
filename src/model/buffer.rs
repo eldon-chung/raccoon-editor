@@ -163,7 +163,7 @@ impl Buffer {
 
             // construct left and right nodes
             let left_node =
-                BufferNode::new(from, index, self.cursor.node_offset, left_line_offsets);
+                BufferNode::new(from, index, cursor_node_offset, left_line_offsets);
             let right_node = BufferNode::new(
                 from,
                 index + self.cursor.node_offset,
@@ -355,7 +355,7 @@ impl Buffer {
             }
 
             let left_node =
-                BufferNode::new(from, index, self.cursor.node_offset - 1, left_line_offsets);
+                BufferNode::new(from, index, cursor_node_offset - 1, left_line_offsets);
             let right_node = BufferNode::new(
                 from,
                 index + self.cursor.node_offset,
