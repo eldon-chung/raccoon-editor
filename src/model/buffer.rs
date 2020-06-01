@@ -217,8 +217,6 @@ impl Buffer {
             let mut new_line_offsets: Vec<usize> = prev_line_offsets.drain(..).collect();
 
             let mut was_newline = false;
-            println!("nodelist: {:?}", self.node_list);
-            println!("index: {:?}", self.node_list.index());
             if self.cursor.line_offset == 0 {
                 // the last character of that node should be '\n'
                 //  in that case we should remove it from the list
