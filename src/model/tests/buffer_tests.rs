@@ -1917,7 +1917,6 @@ mod buffer_tests {
         buffer.insert('5');
         buffer.insert('6');
 
-
         let cursor = buffer.cursor;
         assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch!");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
