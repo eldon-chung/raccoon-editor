@@ -49,7 +49,7 @@ mod buffer_tests {
         buffer.insert('b');
 
         let cursor = buffer.cursor;
-        assert_eq!(cursor.node_offset, 1, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch!");
         assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
         assert_eq!(cursor.line_offset, 1, "cursor.line_offset mismatch!");
         assert_eq!(
@@ -1898,5 +1898,51 @@ mod buffer_tests {
 
         assert_eq!(buffer.node_list.index(), 3, "node_list index mismatch!");
         assert_eq!(buffer.current_line, 2, "buffer.current_line mismatch!");
+    }
+
+    #[test]
+    fn random_test() {
+        let mut buffer = Buffer::new();
+
+        buffer.insert('1');
+        buffer.insert('2');
+        buffer.insert('3');
+        buffer.insert('4');
+
+        println!("{:?}", buffer.cursor);
+        println!("{:?}", buffer.node_list.index());
+        buffer.move_cursor_left();
+        println!("{:?}", buffer.cursor);
+        println!("{:?}", buffer.node_list.index());
+        buffer.insert('5');
+        buffer.insert('6');
+
+
+        let cursor = buffer.cursor;
+        assert_eq!(cursor.node_offset, 0, "cursor.node_offset mismatch!");
+        assert_eq!(cursor.line_idx, 0, "cursor.line_idx mismatch!");
+        assert_eq!(cursor.line_offset, 5, "cursor.line_offset mismatch!");
+        assert_eq!(
+            cursor.original_line_offset, cursor.line_offset,
+            "cursor.line_offset mismatch!"
+        );
+
+        assert_eq!(buffer.original_str, stov(""), "original_str mismatch!");
+        assert_eq!(buffer.added_str, stov("123456"), "added_str mismatch!");
+
+        let node_0 = BufferNode::new(BufferType::Added, 0, 1, vec![0]);
+        let node_1 = BufferNode::new(BufferType::Added, 1, 1, vec![0]);
+        let node_2 = BufferNode::new(BufferType::Added, 2, 1, vec![0]);
+        let node_3 = BufferNode::new(BufferType::Added, 4, 1, vec![0]);
+        let node_4 = BufferNode::new(BufferType::Added, 5, 1, vec![0]);
+        let node_5 = BufferNode::new(BufferType::Added, 3, 1, vec![0]);
+        assert_eq!(
+            buffer.node_list,
+            vec![node_0, node_1, node_2, node_3, node_4, node_5],
+            "node_list contents mismatch!"
+        );
+        assert_eq!(buffer.node_list.index(), 5);
+
+        assert_eq!(buffer.current_line, 0, "buffer.current_line mismatch!");
     }
 }

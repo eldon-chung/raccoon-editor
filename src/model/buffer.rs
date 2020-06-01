@@ -140,8 +140,6 @@ impl Buffer {
             assert_eq!(self.cursor.line_idx, 0);
             // just insert the new node before current node
             //	which is where the cursor is
-            self.cursor.node_offset = new_node.offset();
-            self.cursor.line_idx = new_node.line_offsets_len() - 1;
             self.cursor.line_offset = line_idx_update(self.cursor.line_offset);
             self.cursor.original_line_offset = self.cursor.line_offset;
             self.node_list.insert_prev(new_node);
