@@ -82,6 +82,14 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             app.move_cursor_left();
             Ok(QuitOption::NotQuitting)
         }
+        Event::Input { key: Key::Up, .. } => {
+            app.move_cursor_up();
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input { key: Key::Down, .. } => {
+            app.move_cursor_down();
+            Ok(QuitOption::NotQuitting)
+        }
         _ => Ok(QuitOption::NotQuitting),
     }
 }

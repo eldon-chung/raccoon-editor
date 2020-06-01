@@ -48,4 +48,12 @@ impl App {
     pub fn move_cursor_right(&mut self) {
         self.buffer.move_cursor_right();
     }
+
+    pub fn move_cursor_up(&mut self) {
+        self.buffer.move_cursor_up();
+    }
+
+    pub fn move_cursor_down(&mut self) {
+        self.buffer.move_cursor_down();
+    }
 }
