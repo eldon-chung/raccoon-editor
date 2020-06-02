@@ -723,6 +723,44 @@ mod buffer_tests {
     }
 
     #[test]
+    fn as_tagged_text_on_empty_buffer() {
+        let buffer = Buffer::new();
+        let text = String::new();
+        let tags = Vec::new();
+
+        let tagged_text = buffer.as_tagged_text();
+        assert_eq!(*tagged_text.text(), text);
+        assert_eq!(*tagged_text.tags(), tags);
+    }
+
+    #[test]
+    fn as_tagged_text_on_non_empty_buffer() {
+        let mut buffer = Buffer::with_contents(String::from("\nbc"));
+        buffer.current_line = 1;
+        buffer.cursor.node_offset = 3;
+        buffer.cursor.line_offset = 2;
+        buffer.cursor.line_idx = 1;
+        buffer.cursor.original_line_offset = buffer.cursor.line_offset;
+
+        buffer.insert_str(String::from("de\n"));
+        buffer.insert_str(String::from("ghi"));
+
+        buffer.node_list.move_left();
+        buffer.current_line = 1;
+        buffer.cursor.node_offset = 1;
+        buffer.cursor.line_offset = 4;
+        buffer.cursor.line_idx = 0;
+        buffer.cursor.original_line_offset = buffer.cursor.line_offset;
+
+        let text = String::from("\nbcde\nghi");
+        let tag_0 = TextTag::new(Tag::Cursor, 4, 4);
+        let tags = vec![tag_0];
+        let tagged_text = buffer.as_tagged_text();
+        assert_eq!(*tagged_text.text(), text);
+        assert_eq!(*tagged_text.tags(), tags);
+    }
+
+    #[test]
     fn move_cursor_left_on_empty_buffer() {
         let mut buffer = Buffer::new();
         buffer.move_cursor_left();
