@@ -8,10 +8,7 @@ pub struct TaggedText {
 impl TaggedText {
     pub fn new(text: String, mut tags: Vec<TextTag>) -> TaggedText {
         tags.sort_unstable();
-        TaggedText{
-            text,
-            tags,
-        }
+        TaggedText { text, tags }
     }
 
     pub fn text(&self) -> &String {
