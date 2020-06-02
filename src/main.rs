@@ -1,4 +1,5 @@
 use std::io;
+use std::env;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
 use tui::backend::TermionBackend;
@@ -18,7 +19,8 @@ fn main() -> Result<(), io::Error> {
     println!("Hello, world!");
     // Setup buffers, load configs
     // Construct program state
-    let mut app: App = App::new();
+    let args: Vec<String> = env::args().collect();
+    let mut app: App = App::new(&args);
 
     // Construct the event queue
     let events = Events::new();

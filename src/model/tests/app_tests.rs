@@ -35,7 +35,8 @@ mod app_tests {
         drop(file);
 
         // Prepare the application
-        let mut app = App::new();
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
         app.set_app_mode(AppMode::Command(CommandMode::Read));
         app.command_buffer = Buffer::with_contents(file_path_string);
 
@@ -59,7 +60,8 @@ mod app_tests {
         let file_path_string = file_path.to_string_lossy().into_owned();
 
         // Prepare the application
-        let mut app = App::new();
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
         app.set_app_mode(AppMode::Command(CommandMode::Read));
         app.command_buffer = Buffer::with_contents(file_path_string.clone());
 
@@ -84,7 +86,8 @@ mod app_tests {
         let file_path_string = file_path.to_string_lossy().into_owned();
 
         // Prepare the application
-        let mut app = App::new();
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
         app.set_app_mode(AppMode::Command(CommandMode::Write));
         app.command_buffer = Buffer::with_contents(file_path_string);
         app.buffer = Buffer::with_contents(String::from("Testing Write!"));
@@ -103,7 +106,8 @@ mod app_tests {
 
     #[test]
     fn enter_write_mode_test() {
-        let mut app = App::new();
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
         app.enter_command_write_mode();
 
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
@@ -111,7 +115,8 @@ mod app_tests {
 
     #[test]
     fn enter_read_mode_test() {
-        let mut app = App::new();
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
         app.enter_command_read_mode();
 
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Read));

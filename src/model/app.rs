@@ -26,10 +26,20 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> App {
+    pub fn new(args: &[String]) -> App {
+        let (buffer, command_buffer) = if args.len() < 2 {
+            // No extra arguments passed.
+            // args[0] will always be the name of our binary
+            (Buffer::new(), Buffer::new())
+        } else {
+            // Some arguments are passed in the command line. Just take the first one
+            let contents = App::read_file_content(args[1].clone());
+            (Buffer::with_contents(contents), Buffer::with_contents(args[1].clone()))
+        };
+
         App {
-            buffer: Buffer::new(),
-            command_buffer: Buffer::new(),
+            buffer: buffer,
+            command_buffer: command_buffer,
             app_mode: AppMode::Edit,
         }
     }
@@ -125,6 +135,14 @@ impl App {
         let file_path = self.get_command_buffer_text_as_iter().join("");
 
         // Get contents from file, and initialise buffer with those contents
+        let contents = App::read_file_content(file_path);
+        self.buffer = Buffer::with_contents(contents);
+
+        // Enter editing mode after this
+        self.set_app_mode(AppMode::Edit);
+    }
+
+    fn read_file_content(file_path: String) -> String {
         let contents = match fs::read_to_string(&file_path) {
             Ok(contents) => contents,
             Err(ref e) if e.kind() == ErrorKind::NotFound => {
@@ -133,10 +151,7 @@ impl App {
             }
             Err(e) => panic!("{}", e),
         };
-        self.buffer = Buffer::with_contents(contents);
-
-        // Enter editing mode after this
-        self.set_app_mode(AppMode::Edit);
+        contents
     }
 
     pub fn enter_command_write_mode(&mut self) {
