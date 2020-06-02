@@ -69,7 +69,7 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             // to enter the command
             AppMode::Command(CommandMode::Write) => {
                 app.save_file();
-                Ok(QuitOption::Quitting)
+                Ok(QuitOption::NotQuitting)
             }
             AppMode::Command(CommandMode::Read) => {
                 app.open_file();
@@ -116,7 +116,15 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('s'),
             ..
         } => {
-            app.enter_command_write_mode();
+            app.handle_regular_save();
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input {
+            // This should be replaced with Ctrl+Shift+S. Ctrl + a is temporary workaround
+            key: Key::Ctrl('a'),
+            ..
+        } => {
+            app.handle_save_file_as();
             Ok(QuitOption::NotQuitting)
         }
         Event::Input {

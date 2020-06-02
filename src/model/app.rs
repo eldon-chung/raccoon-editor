@@ -132,8 +132,7 @@ impl App {
 
         fs::write(file_path, text_to_save).expect("Unable to write file");
 
-        // The current implementation will quit after saving. This is here
-        // for the time when we are going to implement saving without quitting
+        // Back to editing mode after saving
         self.set_app_mode(AppMode::Edit);
     }
 
@@ -168,6 +167,31 @@ impl App {
 
     pub fn enter_command_read_mode(&mut self) {
         self.set_app_mode(AppMode::Command(CommandMode::Read));
+    }
+
+    pub fn handle_regular_save(&mut self) {
+        // Probably better to store this somewhere aside from relying on command_buffer
+        let file_path = self.get_command_buffer_text();
+
+        if file_path.len() == 0 {
+            // Empty string, so most likely a fresh text
+            self.enter_command_write_mode();
+        } else {
+            // There is a path. Save there directly
+
+            // A bit of constraint right now is that to save file, we should be in the CommandMode::Write mode
+            // Implemented initially for safety to minimise logical bugs of saving in non-write mode
+            // But that means we have to artificially enter the mode, before we can save
+            self.enter_command_write_mode();
+            self.save_file();
+
+            // Save File should bring you back to Edit Mode
+            assert_eq!(self.app_mode(), AppMode::Edit);
+        }
+    }
+
+    pub fn handle_save_file_as(&mut self) {
+        self.enter_command_write_mode();
     }
 
     fn init_new_file(filepath: String) {
