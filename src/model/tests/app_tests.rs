@@ -72,12 +72,6 @@ mod app_tests {
         let opened_text = app.get_text_as_iter().join("");
         assert_eq!(opened_text, ""); // There should be nothing
 
-        let app_cursor = app.cursor_main();
-        assert_eq!(app_cursor.node_idx, 0, "app_cursor.node_idx mismatch");
-        assert_eq!(app_cursor.node_offset, 0, "app_cursor.node_offset mismatch");
-        assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
-        assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
-
         dir.close()?;
         Ok(())
     }
@@ -113,11 +107,6 @@ mod app_tests {
         app.enter_command_write_mode();
 
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
-        let app_cursor = app.cursor_main();
-        assert_eq!(app_cursor.node_idx, 0, "app_cursor.node_idx mismatch");
-        assert_eq!(app_cursor.node_offset, 0, "app_cursor.node_offset mismatch");
-        assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
-        assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
     }
 
     #[test]
@@ -126,10 +115,5 @@ mod app_tests {
         app.enter_command_read_mode();
 
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Read));
-        let app_cursor = app.cursor_main();
-        assert_eq!(app_cursor.node_idx, 0, "app_cursor.node_idx mismatch");
-        assert_eq!(app_cursor.node_offset, 0, "app_cursor.node_offset mismatch");
-        assert_eq!(app_cursor.line_idx, 0, "app_cursor.line_idx mismatch");
-        assert_eq!(app_cursor.line_offset, 0, "app_cursor.line_offset mismatch");
     }
 }
