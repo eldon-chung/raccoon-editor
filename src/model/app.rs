@@ -1,5 +1,3 @@
-use crate::utils::Cursor;
-
 use super::buffer::Buffer;
 
 use std::fs;
@@ -24,7 +22,6 @@ pub enum CommandMode {
 pub struct App {
     buffer: Buffer,
     command_buffer: Buffer,
-    cursor_main: Cursor,
     app_mode: AppMode,
 }
 
@@ -33,7 +30,6 @@ impl App {
         App {
             buffer: Buffer::new(),
             command_buffer: Buffer::new(),
-            cursor_main: Cursor::new(),
             app_mode: AppMode::Edit,
         }
     }
@@ -41,10 +37,6 @@ impl App {
     // App should only release immutable references to the buffer?
     pub fn buffer(&self) -> &Buffer {
         &self.buffer
-    }
-
-    pub fn cursor_main(&self) -> &Cursor {
-        &self.cursor_main
     }
 
     pub fn app_mode(&self) -> AppMode {
@@ -78,30 +70,38 @@ impl App {
 
     pub fn add_char(&mut self, c: char) {
         match self.app_mode() {
-            AppMode::Edit => self.buffer.insert(&mut self.cursor_main, c),
-            AppMode::Command(_) => self.command_buffer.insert(&mut self.cursor_main, c),
+            AppMode::Edit => self.buffer.insert(c),
+            AppMode::Command(_) => self.command_buffer.insert(c),
         }
     }
 
     pub fn remove_char(&mut self) {
         match self.app_mode() {
-            AppMode::Edit => self.buffer.remove(&mut self.cursor_main),
-            AppMode::Command(_) => self.command_buffer.remove(&mut self.cursor_main),
+            AppMode::Edit => self.buffer.remove(),
+            AppMode::Command(_) => self.command_buffer.remove(),
         }
     }
 
     pub fn move_cursor_left(&mut self) {
         match self.app_mode() {
-            AppMode::Edit => self.buffer.move_cursor_left(&mut self.cursor_main),
-            AppMode::Command(_) => self.command_buffer.move_cursor_left(&mut self.cursor_main),
+            AppMode::Edit => self.buffer.move_cursor_left(),
+            AppMode::Command(_) => self.command_buffer.move_cursor_left(),
         }
     }
 
     pub fn move_cursor_right(&mut self) {
         match self.app_mode() {
-            AppMode::Edit => self.buffer.move_cursor_right(&mut self.cursor_main),
-            AppMode::Command(_) => self.command_buffer.move_cursor_right(&mut self.cursor_main),
+            AppMode::Edit => self.buffer.move_cursor_right(),
+            AppMode::Command(_) => self.command_buffer.move_cursor_right(),
         }
+    }
+
+    pub fn move_cursor_up(&mut self) {
+        self.buffer.move_cursor_up();
+    }
+
+    pub fn move_cursor_down(&mut self) {
+        self.buffer.move_cursor_down();
     }
 
     pub fn save_file(&mut self) {
@@ -135,22 +135,15 @@ impl App {
         };
         self.buffer = Buffer::with_contents(contents);
 
-        // Reset cursor to the start of file
-        self.cursor_main = Cursor::new();
-
         // Enter editing mode after this
         self.set_app_mode(AppMode::Edit);
     }
 
     pub fn enter_command_write_mode(&mut self) {
-        // Reset cursor to start
-        self.cursor_main = Cursor::new();
         self.set_app_mode(AppMode::Command(CommandMode::Write));
     }
 
     pub fn enter_command_read_mode(&mut self) {
-        // Reset cursor to start
-        self.cursor_main = Cursor::new();
         self.set_app_mode(AppMode::Command(CommandMode::Read));
     }
 
