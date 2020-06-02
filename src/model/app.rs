@@ -57,6 +57,14 @@ impl App {
         self.app_mode = app_mode;
     }
 
+    pub fn get_buffer_text(&self) -> String {
+        self.buffer.as_str()
+    }
+
+    pub fn get_command_buffer_text(&self) -> String {
+        self.command_buffer.as_str()
+    }
+
     pub fn get_text_as_iter(&self) -> Vec<String> {
         vec![self.buffer.as_str()]
     }
@@ -117,7 +125,7 @@ impl App {
     pub fn save_file(&mut self) {
         assert!(self.app_mode() == AppMode::Command(CommandMode::Write));
 
-        let file_path = self.get_command_buffer_text_as_iter().join("");
+        let file_path = self.get_command_buffer_text();
 
         // Get from normal buffer
         let text_to_save = self.get_text_as_iter().join("");
@@ -132,7 +140,7 @@ impl App {
     pub fn open_file(&mut self) {
         assert!(self.app_mode() == AppMode::Command(CommandMode::Read));
 
-        let file_path = self.get_command_buffer_text_as_iter().join("");
+        let file_path = self.get_command_buffer_text();
 
         // Get contents from file, and initialise buffer with those contents
         let contents = App::read_file_content(file_path);

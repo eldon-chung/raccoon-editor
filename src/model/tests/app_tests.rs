@@ -42,7 +42,7 @@ mod app_tests {
 
         app.open_file();
 
-        let opened_text = app.get_text_as_iter().join("");
+        let opened_text = app.get_buffer_text();
         assert_eq!(
             opened_text, "Testing Read!",
             "Mismatch between opened text and what is in the buffer"
@@ -71,7 +71,7 @@ mod app_tests {
             Path::new(&file_path_string).exists(),
             "A new file is not created"
         );
-        let opened_text = app.get_text_as_iter().join("");
+        let opened_text = app.get_buffer_text();
         assert_eq!(opened_text, ""); // There should be nothing
 
         dir.close()?;
