@@ -34,7 +34,10 @@ impl App {
         } else {
             // Some arguments are passed in the command line. Just take the first one
             let contents = App::read_file_content(args[1].clone());
-            (Buffer::with_contents(contents), Buffer::with_contents(args[1].clone()))
+            (
+                Buffer::with_contents(contents),
+                Buffer::with_contents(args[1].clone()),
+            )
         };
 
         App {

@@ -1,5 +1,5 @@
-use std::io;
 use std::env;
+use std::io;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
 use tui::backend::TermionBackend;
