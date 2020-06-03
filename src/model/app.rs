@@ -126,7 +126,7 @@ impl App {
     }
 
     pub fn save_file(&mut self) {
-        assert!(self.app_mode() == AppMode::Command(CommandMode::Write));
+        assert_eq!(self.app_mode(), AppMode::Command(CommandMode::Write));
 
         let file_path = self.get_command_buffer_text();
 
@@ -140,7 +140,7 @@ impl App {
     }
 
     pub fn open_file(&mut self) {
-        assert!(self.app_mode() == AppMode::Command(CommandMode::Read));
+        assert_eq!(self.app_mode(), AppMode::Command(CommandMode::Read));
 
         let file_path = self.get_command_buffer_text();
 
