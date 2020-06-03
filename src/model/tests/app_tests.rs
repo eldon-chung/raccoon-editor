@@ -258,7 +258,7 @@ mod app_tests {
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
 
-        app.handle_regular_save();
+        app.handle_save_as_new_file();
         assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
     }
 
