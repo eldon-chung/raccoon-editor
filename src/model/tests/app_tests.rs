@@ -92,6 +92,9 @@ mod app_tests {
         // Make the file become writeonly
         let metadata = file.metadata().expect("Failed to get metadata");
         let mut permissions = metadata.permissions();
+
+        // NOTE: set_mode is supported on Unix only
+        // See https://doc.rust-lang.org/std/os/unix/fs/trait.PermissionsExt.html
         permissions.set_mode(0o244); // -w-r--r-- permission, with writeonly for the user
         fs::set_permissions(file_path, permissions).expect("Failed to set permissions");
 
