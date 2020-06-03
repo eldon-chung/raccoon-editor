@@ -251,4 +251,58 @@ mod app_tests {
 
         Ok(())
     }
+
+    #[test]
+    fn handle_save_as_new_file_test() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+
+        app.handle_regular_save();
+        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
+    }
+
+    #[test]
+    fn add_char_in_edit_mode() {
+        // Prepare the application
+        // Note that both buffers are empty and we start the app in edit mode
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+
+        app.add_char('a');
+        app.add_char('b');
+
+        assert_eq!("ab", app.buffer.as_str());
+        assert_eq!("", app.command_buffer.as_str()); // Command buffer should still be the same
+    }
+    
+    #[test]
+    fn add_char_in_command_write_mode() {
+        // Prepare the application
+        // Note that both buffers are empty and we start the app in edit mode
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.set_app_mode(AppMode::Command(CommandMode::Write));
+
+        app.add_char('a');
+        app.add_char('b');
+
+        assert_eq!("", app.buffer.as_str()); // Buffer should still be the same
+        assert_eq!("ab", app.command_buffer.as_str());
+    }
+
+    #[test]
+    fn add_char_in_command_read_mode() {
+        // Prepare the application
+        // Note that both buffers are empty and we start the app in edit mode
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.set_app_mode(AppMode::Command(CommandMode::Read));
+
+        app.add_char('a');
+        app.add_char('b');
+
+        assert_eq!("", app.buffer.as_str()); // Buffer should still be the same
+        assert_eq!("ab", app.command_buffer.as_str());
+    }
 }
