@@ -275,7 +275,7 @@ mod app_tests {
         assert_eq!("ab", app.buffer.as_str());
         assert_eq!("", app.command_buffer.as_str()); // Command buffer should still be the same
     }
-    
+
     #[test]
     fn add_char_in_command_write_mode() {
         // Prepare the application
