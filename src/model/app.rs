@@ -164,28 +164,20 @@ impl App {
         contents
     }
 
-    pub fn enter_command_write_mode(&mut self) {
-        self.set_app_mode(AppMode::Command(CommandMode::Write));
-    }
-
-    pub fn enter_command_read_mode(&mut self) {
-        self.set_app_mode(AppMode::Command(CommandMode::Read));
-    }
-
     pub fn handle_regular_save(&mut self) {
         // Probably better to store this somewhere aside from relying on command_buffer
         let file_path = self.get_command_buffer_text();
 
         if file_path.len() == 0 {
             // Empty string, so most likely a fresh text
-            self.enter_command_write_mode();
+            self.set_app_mode(AppMode::Command(CommandMode::Write));
         } else {
             // There is a path. Save there directly
 
             // A bit of constraint right now is that to save file, we should be in the CommandMode::Write mode
             // Implemented initially for safety to minimise logical bugs of saving in non-write mode
             // But that means we have to artificially enter the mode, before we can save
-            self.enter_command_write_mode();
+            self.set_app_mode(AppMode::Command(CommandMode::Write));
             self.save_file();
 
             // Save File should bring you back to Edit Mode
@@ -193,8 +185,9 @@ impl App {
         }
     }
 
-    pub fn handle_save_file_as(&mut self) {
-        self.enter_command_write_mode();
+    pub fn handle_save_as_new_file(&mut self) {
+        // Just enter the command mode write normally if we want to save as new file
+        self.set_app_mode(AppMode::Command(CommandMode::Write));
     }
 
     fn init_new_file(filepath: String) {

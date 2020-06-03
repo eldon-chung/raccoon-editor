@@ -124,14 +124,14 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('a'),
             ..
         } => {
-            app.handle_save_file_as();
+            app.handle_save_as_new_file();
             Ok(QuitOption::NotQuitting)
         }
         Event::Input {
             key: Key::Ctrl('o'),
             ..
         } => {
-            app.enter_command_read_mode();
+            app.set_app_mode(AppMode::Command(CommandMode::Read));
             Ok(QuitOption::NotQuitting)
         }
         _ => Ok(QuitOption::NotQuitting),

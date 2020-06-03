@@ -105,32 +105,6 @@ mod app_tests {
     }
 
     #[test]
-    #[should_panic(expected = "Unable to write file")]
-    fn save_readonly_file_fail() {
-        // Doesn't return io::Result<()> like other tests because should_panic must return unit
-        // Prepare the files
-        let dir = tempdir().expect("Failed to create tempdir");
-        let file_path = dir.path().join("temp.txt");
-        let file_path_string = file_path.to_string_lossy().into_owned();
-        let file = File::create(file_path.clone()).expect("Failed to create file");
-
-        // Make the file become readonly
-        let metadata = file.metadata().expect("Failed to get metadata");
-        let mut permissions = metadata.permissions();
-        permissions.set_readonly(true);
-        fs::set_permissions(file_path, permissions).expect("Failed to set permissions");
-
-        // Prepare the application
-        let args: Vec<String> = Vec::new();
-        let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Write));
-        app.command_buffer = Buffer::with_contents(file_path_string.clone());
-        app.buffer = Buffer::with_contents(String::from("Testing Write, this should fail!"));
-
-        app.save_file();
-    }
-
-    #[test]
     fn save_file_success() -> io::Result<()> {
         // Prepare the files
         let dir = tempdir()?;
@@ -157,20 +131,28 @@ mod app_tests {
     }
 
     #[test]
-    fn enter_write_mode_test() {
+    #[should_panic(expected = "Unable to write file")]
+    fn save_readonly_file_fail() {
+        // Doesn't return io::Result<()> like other tests because should_panic must return unit
+        // Prepare the files
+        let dir = tempdir().expect("Failed to create tempdir");
+        let file_path = dir.path().join("temp.txt");
+        let file_path_string = file_path.to_string_lossy().into_owned();
+        let file = File::create(file_path.clone()).expect("Failed to create file");
+
+        // Make the file become readonly
+        let metadata = file.metadata().expect("Failed to get metadata");
+        let mut permissions = metadata.permissions();
+        permissions.set_readonly(true);
+        fs::set_permissions(file_path, permissions).expect("Failed to set permissions");
+
+        // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.enter_command_write_mode();
+        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.command_buffer = Buffer::with_contents(file_path_string.clone());
+        app.buffer = Buffer::with_contents(String::from("Testing Write, this should fail!"));
 
-        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
-    }
-
-    #[test]
-    fn enter_read_mode_test() {
-        let args: Vec<String> = Vec::new();
-        let mut app = App::new(&args);
-        app.enter_command_read_mode();
-
-        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Read));
+        app.save_file();
     }
 }
