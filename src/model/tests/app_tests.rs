@@ -158,4 +158,97 @@ mod app_tests {
 
         app.save_file();
     }
+
+    #[test]
+    fn get_text_in_edit_mode() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.buffer = Buffer::with_contents(String::from("Piece Tables!"));
+
+        let text_as_iter = app.get_text_based_on_mode();
+        assert_eq!(text_as_iter, vec!["Piece Tables!"]);
+    }
+
+    #[test]
+    fn get_text_in_command_write_mode() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.command_buffer = Buffer::with_contents(String::from("Gap Buffers!"));
+
+        let text_as_iter = app.get_text_based_on_mode();
+        assert_eq!(text_as_iter, vec!["Gap Buffers!"]);
+    }
+
+    #[test]
+    fn get_text_in_command_read_mode() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.set_app_mode(AppMode::Command(CommandMode::Read));
+        app.command_buffer = Buffer::with_contents(String::from("Rope!"));
+
+        let text_as_iter = app.get_text_based_on_mode();
+        assert_eq!(text_as_iter, vec!["Rope!"]);
+    }
+
+    #[test]
+    fn get_buffer_text_test() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.buffer = Buffer::with_contents(String::from("Piece Tables!"));
+
+        let text = app.get_buffer_text();
+        assert_eq!(text, "Piece Tables!");
+    }
+
+    #[test]
+    fn get_command_buffer_text_test() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.command_buffer = Buffer::with_contents(String::from("Gap Buffers!"));
+
+        let text = app.get_command_buffer_text();
+        assert_eq!(text, "Gap Buffers!");
+    }
+
+    #[test]
+    fn handle_regular_save_with_no_filepath() {
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+
+        app.handle_regular_save();
+        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
+    }
+
+    #[test]
+    fn handle_regular_save_with_a_filepath() -> io::Result<()> {
+        // Prepare the files
+        let dir = tempdir()?;
+        let file_path = dir.path().join("temp.txt");
+        let file_path_string = file_path.to_string_lossy().into_owned();
+
+        // Prepare the application
+        let args: Vec<String> = Vec::new();
+        let mut app = App::new(&args);
+        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.command_buffer = Buffer::with_contents(file_path_string);
+        app.buffer = Buffer::with_contents(String::from("Testing Write!"));
+
+        app.handle_regular_save();
+        assert_eq!(app.app_mode(), AppMode::Edit);
+
+        let saved_text = fs::read_to_string(file_path)?;
+        assert_eq!(
+            saved_text, "Testing Write!",
+            "Mismatch between the text that has been saved and what was in the buffer"
+        );
+
+        Ok(())
+    }
 }
