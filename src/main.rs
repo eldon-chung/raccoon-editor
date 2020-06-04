@@ -39,13 +39,11 @@ fn main() -> Result<(), io::Error> {
             Err(e) => panic!("{:?}", e),
         };
 
-
         match handle_event(event, &mut app) {
             Ok(QuitOption::Quitting) => break,
             Ok(QuitOption::NotQuitting) => {}
             Err(x) => panic!("{:?}", x),
         };
-
     }
 
     Ok(())

@@ -18,7 +18,7 @@ impl TextTag {
         TextTag {
             tag,
             start_idx, // inclusive
-            end_idx, // exclusive
+            end_idx,   // exclusive
         }
     }
 
