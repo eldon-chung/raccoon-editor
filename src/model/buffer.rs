@@ -480,7 +480,7 @@ impl Buffer {
         //  their indices and offsets and which string they refer to
 
         if self.node_list.is_empty() {
-            return TaggedText::new(String::new(), Vec::new());
+            return TaggedText::new(String::new(), vec![TextTag::new(Tag::Cursor, 0, 1)]);
         }
         let mut tags: Vec<TextTag> = Vec::new();
 
@@ -517,10 +517,10 @@ impl Buffer {
         let chunk = str::from_utf8(slice).unwrap();
         left_str.push_str(chunk);
 
-        let cursor_tag = TextTag::new(Tag::Cursor, left_str.len(), left_str.len());
+        let cursor_tag = TextTag::new(Tag::Cursor, left_str.len(), left_str.len() + 1);
         tags.push(cursor_tag);
 
-        let slice = &source[current_node.index() + self.cursor.node_offset..current_node.offset()];
+        let slice = &source[current_node.index() + self.cursor.node_offset..current_node.index() + current_node.offset()];
         let chunk = str::from_utf8(slice).unwrap();
         left_str.push_str(chunk);
         left_str = right_iter.fold(left_str, |mut acc, node| {

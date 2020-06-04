@@ -1,5 +1,6 @@
 use super::buffer::Buffer;
 use super::cursor::Cursor;
+use super::taggedtext::TaggedText;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {
@@ -31,6 +32,10 @@ impl App {
 
     pub fn get_text_as_iter(&self) -> Vec<String> {
         vec![self.buffer.as_str()]
+    }
+
+    pub fn get_tagged_text(&self) -> TaggedText {
+        self.buffer.as_tagged_text()
     }
 
     pub fn add_char(&mut self, c: char) {

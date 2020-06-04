@@ -7,7 +7,7 @@ pub struct TextTag {
     end_idx: usize,
 }
 
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Tag {
     Cursor,
     Highlighted,
@@ -17,8 +17,8 @@ impl TextTag {
     pub fn new(tag: Tag, start_idx: usize, end_idx: usize) -> TextTag {
         TextTag {
             tag,
-            start_idx,
-            end_idx,
+            start_idx, // inclusive
+            end_idx, // exclusive
         }
     }
 

@@ -15,7 +15,6 @@ mod view;
 use crate::view::View;
 
 fn main() -> Result<(), io::Error> {
-    println!("Hello, world!");
     // Setup buffers, load configs
     // Construct program state
     let mut app: App = App::new();
@@ -40,11 +39,13 @@ fn main() -> Result<(), io::Error> {
             Err(e) => panic!("{:?}", e),
         };
 
+
         match handle_event(event, &mut app) {
             Ok(QuitOption::Quitting) => break,
             Ok(QuitOption::NotQuitting) => {}
             Err(x) => panic!("{:?}", x),
         };
+
     }
 
     Ok(())

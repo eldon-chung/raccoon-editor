@@ -1,5 +1,6 @@
 use super::texttag::TextTag;
 
+#[derive(Debug)]
 pub struct TaggedText {
     text: String,
     tags: Vec<TextTag>,
@@ -13,6 +14,10 @@ impl TaggedText {
 
     pub fn text(&self) -> &String {
         &self.text
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.text.as_str()
     }
 
     pub fn tags(&self) -> &Vec<TextTag> {

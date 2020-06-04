@@ -726,7 +726,7 @@ mod buffer_tests {
     fn as_tagged_text_on_empty_buffer() {
         let buffer = Buffer::new();
         let text = String::new();
-        let tags = Vec::new();
+        let tags = vec![TextTag::new(Tag::Cursor, 0, 1)];
 
         let tagged_text = buffer.as_tagged_text();
         assert_eq!(*tagged_text.text(), text);
@@ -753,7 +753,7 @@ mod buffer_tests {
         buffer.cursor.original_line_offset = buffer.cursor.line_offset;
 
         let text = String::from("\nbcde\nghi");
-        let tag_0 = TextTag::new(Tag::Cursor, 4, 4);
+        let tag_0 = TextTag::new(Tag::Cursor, 4, 5);
         let tags = vec![tag_0];
         let tagged_text = buffer.as_tagged_text();
         assert_eq!(*tagged_text.text(), text);
