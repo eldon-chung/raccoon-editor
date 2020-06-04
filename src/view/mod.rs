@@ -199,8 +199,8 @@ mod Highlighter {
             assert_eq!(
                 text,
                 [Text::styled(
-                    " ",
-                    Style::default().fg(Color::Black).bg(Color::White)
+                    "█",
+                    Style::default().fg(Color::White).bg(Color::Black)
                 )]
             );
         }
@@ -215,7 +215,7 @@ mod Highlighter {
             let text = highlight_tagged_text(&tagged_text);
             let expected_text = [
                 Text::styled("a", Style::default()),
-                Text::styled(" ", Style::default().fg(Color::Black).bg(Color::White)),
+                Text::styled("█", Style::default().fg(Color::White).bg(Color::Black)),
             ];
             assert_eq!(text, expected_text);
         }
