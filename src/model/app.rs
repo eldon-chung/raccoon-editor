@@ -1,7 +1,6 @@
 use super::buffer::Buffer;
 use super::taggedtext::TaggedText;
 
-
 use std::fs;
 use std::fs::File;
 use std::io::ErrorKind;
@@ -62,6 +61,10 @@ impl App {
         self.app_mode = app_mode;
     }
 
+    pub fn get_tagged_text(&self) -> TaggedText {
+        self.buffer.as_tagged_text()
+    }
+
     pub fn get_buffer_text(&self) -> String {
         self.buffer.as_str()
     }
@@ -74,10 +77,6 @@ impl App {
         vec![self.buffer.as_str()]
     }
 
-<<<<<<< HEAD
-    pub fn get_tagged_text(&self) -> TaggedText {
-        self.buffer.as_tagged_text()
-=======
     // Originally implemented with get_text_as_iter using a match depending on the app_mode
     // but decided to separate it out and write another method because accessing a buffer
     // should be independent of app_mode.
@@ -93,7 +92,6 @@ impl App {
             AppMode::Edit => self.get_text_as_iter(),
             AppMode::Command(_) => self.get_command_buffer_text_as_iter(),
         }
->>>>>>> master
     }
 
     pub fn add_char(&mut self, c: char) {
