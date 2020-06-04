@@ -1,3 +1,4 @@
+use std::env;
 use std::io;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
@@ -9,7 +10,7 @@ use crate::utils::events::{Event, Events};
 use crate::utils::QuitOption;
 
 mod model;
-use crate::model::app::App;
+use crate::model::app::{App, AppMode, CommandMode};
 
 mod view;
 use crate::view::View;
@@ -17,7 +18,8 @@ use crate::view::View;
 fn main() -> Result<(), io::Error> {
     // Setup buffers, load configs
     // Construct program state
-    let mut app: App = App::new();
+    let args: Vec<String> = env::args().collect();
+    let mut app: App = App::new(&args);
 
     // Construct the event queue
     let events = Events::new();
@@ -59,6 +61,26 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             ..
         } => Ok(QuitOption::Quitting),
         Event::Input {
+            key: Key::Char('\n'),
+            ..
+        } => match app.app_mode() {
+            // If in command mode, pressing enter means you want
+            // to enter the command
+            AppMode::Command(CommandMode::Write) => {
+                app.save_file();
+                Ok(QuitOption::NotQuitting)
+            }
+            AppMode::Command(CommandMode::Read) => {
+                app.open_file();
+                Ok(QuitOption::NotQuitting)
+            }
+            _ => {
+                // in Edit mode, it means you want to insert the newline character
+                app.add_char('\n');
+                Ok(QuitOption::NotQuitting)
+            }
+        },
+        Event::Input {
             key: Key::Char(c), ..
         } => {
             app.add_char(c);
@@ -87,6 +109,28 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         }
         Event::Input { key: Key::Down, .. } => {
             app.move_cursor_down();
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input {
+            key: Key::Ctrl('s'),
+            ..
+        } => {
+            app.handle_regular_save();
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input {
+            // This should be replaced with Ctrl+Shift+S. Ctrl + a is temporary workaround
+            key: Key::Ctrl('a'),
+            ..
+        } => {
+            app.handle_save_as_new_file();
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input {
+            key: Key::Ctrl('o'),
+            ..
+        } => {
+            app.set_app_mode(AppMode::Command(CommandMode::Read));
             Ok(QuitOption::NotQuitting)
         }
         _ => Ok(QuitOption::NotQuitting),
