@@ -44,7 +44,6 @@ impl<B: Backend> View<B> {
         let tagged_text = app.get_tagged_text(); // Get a copy of the text to be rendered
                                                  // For now let's not do anything fancy formatting
         let text: Vec<_> = Highlighter::highlight_tagged_text(&tagged_text);
-        eprintln!("highlighted_text: {:?}", text);
         self.terminal.draw(|mut f| {
             let size = f.size();
             let block = Paragraph::new(text.iter())
