@@ -59,14 +59,17 @@ mod highlighter {
 
     use std::iter::IntoIterator;
 
+    use super::StyleFunc;
     use crate::model::taggedtext::TaggedText;
     use crate::model::texttag::*;
-    use super::StyleFunc;
 
     use tui::style::{Color, Style};
     use tui::widgets::Text;
 
-    pub fn highlight_tagged_text<'a>(text: &'a TaggedText, tag_to_func: &HashMap<Tag, StyleFunc>) -> Vec<Text<'a>> {
+    pub fn highlight_tagged_text<'a>(
+        text: &'a TaggedText,
+        tag_to_func: &HashMap<Tag, StyleFunc>,
+    ) -> Vec<Text<'a>> {
         let mut highlighted_text: Vec<Text> = Vec::new();
 
         // break the boundaries of the Tags into two queues
@@ -92,7 +95,8 @@ mod highlighter {
 
             if left == start_indices.len() && right == end_indices.len() {
                 chunk_str = &tagged_str[last_idx..tagged_str.len()];
-                let styled_chunk = Text::styled(chunk_str, style_from_tags(&active_tags, tag_to_func));
+                let styled_chunk =
+                    Text::styled(chunk_str, style_from_tags(&active_tags, tag_to_func));
                 highlighted_text.push(styled_chunk);
                 break;
             }
@@ -119,7 +123,8 @@ mod highlighter {
                             Text::styled("█", Style::default().bg(Color::Black).fg(Color::White));
                         highlighted_text.push(styled_chunk);
                     }
-                    let styled_chunk = Text::styled(chunk_str, style_from_tags(&active_tags, tag_to_func));
+                    let styled_chunk =
+                        Text::styled(chunk_str, style_from_tags(&active_tags, tag_to_func));
                     highlighted_text.push(styled_chunk);
                 }
                 active_tags.remove(&next_tag);
@@ -137,7 +142,8 @@ mod highlighter {
                             Text::styled("█", Style::default().bg(Color::Black).fg(Color::White));
                         highlighted_text.push(styled_chunk);
                     }
-                    let styled_chunk = Text::styled(chunk_str, style_from_tags(&active_tags, tag_to_func));
+                    let styled_chunk =
+                        Text::styled(chunk_str, style_from_tags(&active_tags, tag_to_func));
                     highlighted_text.push(styled_chunk);
                 }
                 active_tags.insert(next_tag);
@@ -151,13 +157,15 @@ mod highlighter {
     fn style_from_tags(active_tags: &HashSet<Tag>, tag_to_func: &HashMap<Tag, StyleFunc>) -> Style {
         let initial_style = if active_tags.contains(&Tag::Cursor) {
             Style::default().fg(Color::Black).bg(Color::White)
-        } else { Style::default() };
-        active_tags.iter().fold(initial_style, |acc, tag| {
-            match tag_to_func.get(&tag) {
+        } else {
+            Style::default()
+        };
+        active_tags
+            .iter()
+            .fold(initial_style, |acc, tag| match tag_to_func.get(&tag) {
                 Some(func_struct) => (func_struct.f)(acc),
                 None => acc,
-            }
-        })
+            })
     }
 
     #[cfg(test)]
@@ -167,12 +175,7 @@ mod highlighter {
         #[test]
         fn highlight_empty_text() {
             let mut tag_to_func = HashMap::new();
-            tag_to_func.insert(
-                Tag::Cursor,
-                StyleFunc {
-                    f: |arg_1| arg_1,
-                },
-            );
+            tag_to_func.insert(Tag::Cursor, StyleFunc { f: |arg_1| arg_1 });
             let text = String::new();
             let tags = vec![TextTag::new(Tag::Cursor, 0, 1)];
             let tagged_text = TaggedText::new(text, tags);
@@ -190,12 +193,7 @@ mod highlighter {
         #[test]
         fn highlight_single_char() {
             let mut tag_to_func = HashMap::new();
-            tag_to_func.insert(
-                Tag::Cursor,
-                StyleFunc {
-                    f: |arg_1| arg_1,
-                },
-            );
+            tag_to_func.insert(Tag::Cursor, StyleFunc { f: |arg_1| arg_1 });
             let text = String::from("a");
             let tag_0 = TextTag::new(Tag::Cursor, 1, 2);
             let tags = vec![tag_0];

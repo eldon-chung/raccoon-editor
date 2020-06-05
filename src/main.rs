@@ -1,12 +1,12 @@
-use std::env;
 use std::collections::HashMap;
+use std::env;
 use std::io;
 
 use termion::event::Key;
 use termion::raw::IntoRawMode;
 use tui::backend::TermionBackend;
-use tui::Terminal;
 use tui::style::{Color, Style};
+use tui::Terminal;
 
 mod utils;
 use crate::utils::events::{Event, Events};
@@ -29,12 +29,7 @@ fn main() -> Result<(), io::Error> {
     // Load the view configs
     let mut tag_to_func = HashMap::new();
     // TODO: eventually this should be loading such configurations from a file
-    tag_to_func.insert(
-        Tag::Cursor,
-        view::StyleFunc {
-            f: |arg_1| arg_1,
-        },
-    );
+    tag_to_func.insert(Tag::Cursor, view::StyleFunc { f: |arg_1| arg_1 });
 
     // Construct the event queue
     let events = Events::new();
