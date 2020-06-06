@@ -23,7 +23,7 @@ pub enum CommandMode {
 pub struct App {
     buffer: Buffer,
     command_buffer: Buffer,
-    app_mode: AppMode,
+    mode: AppMode,
 }
 
 impl App {
@@ -44,7 +44,7 @@ impl App {
         App {
             buffer: buffer,
             command_buffer: command_buffer,
-            app_mode: AppMode::Edit,
+            mode: AppMode::Edit,
         }
     }
 
@@ -53,15 +53,19 @@ impl App {
         &self.buffer
     }
 
-    pub fn app_mode(&self) -> AppMode {
-        self.app_mode
+    pub fn mode(&self) -> AppMode {
+        self.mode
     }
 
-    pub fn set_app_mode(&mut self, app_mode: AppMode) {
-        self.app_mode = app_mode;
+    pub fn set_mode(&mut self, mode: AppMode) {
+        self.mode = mode;
     }
 
-    pub fn get_tagged_text(&self) -> TaggedText {
+    pub fn get_command_buffer_as_tagged_text(&self) -> TaggedText {
+        self.command_buffer.as_tagged_text()
+    }
+
+    pub fn get_buffer_as_tagged_text(&self) -> TaggedText {
         self.buffer.as_tagged_text()
     }
 
@@ -77,9 +81,9 @@ impl App {
         vec![self.buffer.as_str()]
     }
 
-    // Originally implemented with get_text_as_iter using a match depending on the app_mode
+    // Originally implemented with get_text_as_iter using a match depending on the mode
     // but decided to separate it out and write another method because accessing a buffer
-    // should be independent of app_mode.
+    // should be independent of mode.
     // We can discuss the naming of this method if required
     pub fn get_command_buffer_text_as_iter(&self) -> Vec<String> {
         vec![self.command_buffer.as_str()]
@@ -88,35 +92,35 @@ impl App {
     // This method was written to make the View as "dumb" as possible
     // The App will handle which text is to be shown
     pub fn get_text_based_on_mode(&self) -> Vec<String> {
-        match self.app_mode() {
+        match self.mode() {
             AppMode::Edit => self.get_text_as_iter(),
             AppMode::Command(_) => self.get_command_buffer_text_as_iter(),
         }
     }
 
     pub fn add_char(&mut self, c: char) {
-        match self.app_mode() {
+        match self.mode() {
             AppMode::Edit => self.buffer.insert(c),
             AppMode::Command(_) => self.command_buffer.insert(c),
         }
     }
 
     pub fn remove_char(&mut self) {
-        match self.app_mode() {
+        match self.mode() {
             AppMode::Edit => self.buffer.remove(),
             AppMode::Command(_) => self.command_buffer.remove(),
         }
     }
 
     pub fn move_cursor_left(&mut self) {
-        match self.app_mode() {
+        match self.mode() {
             AppMode::Edit => self.buffer.move_cursor_left(),
             AppMode::Command(_) => self.command_buffer.move_cursor_left(),
         }
     }
 
     pub fn move_cursor_right(&mut self) {
-        match self.app_mode() {
+        match self.mode() {
             AppMode::Edit => self.buffer.move_cursor_right(),
             AppMode::Command(_) => self.command_buffer.move_cursor_right(),
         }
@@ -131,7 +135,7 @@ impl App {
     }
 
     pub fn save_file(&mut self) {
-        assert_eq!(self.app_mode(), AppMode::Command(CommandMode::Write));
+        assert_eq!(self.mode(), AppMode::Command(CommandMode::Write));
 
         let file_path = self.get_command_buffer_text();
 
@@ -141,11 +145,11 @@ impl App {
         fs::write(file_path, text_to_save).expect("Unable to write file");
 
         // Back to editing mode after saving
-        self.set_app_mode(AppMode::Edit);
+        self.set_mode(AppMode::Edit);
     }
 
     pub fn open_file(&mut self) {
-        assert_eq!(self.app_mode(), AppMode::Command(CommandMode::Read));
+        assert_eq!(self.mode(), AppMode::Command(CommandMode::Read));
 
         let file_path = self.get_command_buffer_text();
 
@@ -154,7 +158,7 @@ impl App {
         self.buffer = Buffer::with_contents(contents);
 
         // Enter editing mode after this
-        self.set_app_mode(AppMode::Edit);
+        self.set_mode(AppMode::Edit);
     }
 
     fn read_file_content(file_path: String) -> String {
@@ -175,24 +179,24 @@ impl App {
 
         if file_path.len() == 0 {
             // Empty string, so most likely a fresh text
-            self.set_app_mode(AppMode::Command(CommandMode::Write));
+            self.set_mode(AppMode::Command(CommandMode::Write));
         } else {
             // There is a path. Save there directly
 
             // A bit of constraint right now is that to save file, we should be in the CommandMode::Write mode
             // Implemented initially for safety to minimise logical bugs of saving in non-write mode
             // But that means we have to artificially enter the mode, before we can save
-            self.set_app_mode(AppMode::Command(CommandMode::Write));
+            self.set_mode(AppMode::Command(CommandMode::Write));
             self.save_file();
 
             // Save File should bring you back to Edit Mode
-            assert_eq!(self.app_mode(), AppMode::Edit);
+            assert_eq!(self.mode(), AppMode::Edit);
         }
     }
 
     pub fn handle_save_as_new_file(&mut self) {
         // Just enter the command mode write normally if we want to save as new file
-        self.set_app_mode(AppMode::Command(CommandMode::Write));
+        self.set_mode(AppMode::Command(CommandMode::Write));
     }
 
     fn init_new_file(filepath: String) {

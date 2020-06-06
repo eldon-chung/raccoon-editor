@@ -73,7 +73,7 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         Event::Input {
             key: Key::Char('\n'),
             ..
-        } => match app.app_mode() {
+        } => match app.mode() {
             // If in command mode, pressing enter means you want
             // to enter the command
             AppMode::Command(CommandMode::Write) => {
@@ -140,7 +140,7 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('o'),
             ..
         } => {
-            app.set_app_mode(AppMode::Command(CommandMode::Read));
+            app.set_mode(AppMode::Command(CommandMode::Read));
             Ok(QuitOption::NotQuitting)
         }
         _ => Ok(QuitOption::NotQuitting),

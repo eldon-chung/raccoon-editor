@@ -35,13 +35,17 @@ impl<B: Backend> View<B> {
     }
 
     pub fn update_display(&mut self, app: &App) -> Result<(), io::Error> {
-        let tagged_text = app.get_tagged_text(); // Get a copy of the text to be rendered
-                                                 // For now let's not do anything fancy formatting
+        let (tagged_text, title) = match app.mode() {
+            AppMode::Command(CommandMode::Read) => (app.get_command_buffer_as_tagged_text(), "Command mode: Opening a file"),
+            AppMode::Command(CommandMode::Write) => (app.get_command_buffer_as_tagged_text(), "Command mode: Saving into file"),
+            AppMode::Edit => (app.get_buffer_as_tagged_text(), "Edit mode")
+        };
+
         let text: Vec<_> = highlighter::highlight_tagged_text(&tagged_text, &self.tag_to_func);
         self.terminal.draw(|mut f| {
             let size = f.size();
             let block = Paragraph::new(text.iter())
-                .block(Block::default().title("Paragraph").borders(Borders::ALL))
+                .block(Block::default().title(title).borders(Borders::ALL))
                 .style(Style::default().fg(Color::White).bg(Color::Black))
                 .alignment(Alignment::Left)
                 .wrap(true);
