@@ -36,9 +36,15 @@ impl<B: Backend> View<B> {
 
     pub fn update_display(&mut self, app: &App) -> Result<(), io::Error> {
         let (tagged_text, title) = match app.mode() {
-            AppMode::Command(CommandMode::Read) => (app.get_command_buffer_as_tagged_text(), "Command mode: Opening a file"),
-            AppMode::Command(CommandMode::Write) => (app.get_command_buffer_as_tagged_text(), "Command mode: Saving into file"),
-            AppMode::Edit => (app.get_buffer_as_tagged_text(), "Edit mode")
+            AppMode::Command(CommandMode::Read) => (
+                app.get_command_buffer_as_tagged_text(),
+                "Command mode: Opening a file",
+            ),
+            AppMode::Command(CommandMode::Write) => (
+                app.get_command_buffer_as_tagged_text(),
+                "Command mode: Saving into file",
+            ),
+            AppMode::Edit => (app.get_buffer_as_tagged_text(), "Edit mode"),
         };
 
         let text: Vec<_> = highlighter::highlight_tagged_text(&tagged_text, &self.tag_to_func);
