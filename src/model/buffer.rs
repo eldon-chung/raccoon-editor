@@ -2,6 +2,8 @@ use std::str;
 
 use super::cursor::Cursor;
 use super::nodelist::*;
+use super::taggedtext::TaggedText;
+use super::texttag::*;
 
 macro_rules! min {
     ($x:expr, $y:expr) => {
@@ -470,6 +472,70 @@ impl Buffer {
             acc
         });
         vec![left_str, right_str]
+    }
+
+    pub fn as_tagged_text(&self) -> TaggedText {
+        // construct a serialised string by iterating through the nodes
+        //  and copying the contents that they refer to based on
+        //  their indices and offsets and which string they refer to
+
+        if self.node_list.is_empty() {
+            return TaggedText::new(String::new(), vec![TextTag::new(Tag::Cursor, 0, 1)]);
+        }
+        let mut tags: Vec<TextTag> = Vec::new();
+
+        let left_iter = self.node_list.iter_until_curr();
+        let right_iter = self.node_list.iter_from_after_curr();
+        let mut left_str = String::new();
+        let mut right_str = String::new();
+
+        let mut left_str = left_iter
+            .enumerate()
+            .filter_map(|(i, e)| {
+                if i != self.node_list.index() {
+                    Some(e)
+                } else {
+                    None
+                }
+            })
+            .fold(left_str, |mut acc, node| {
+                let source = match node.from() {
+                    BufferType::Original => &self.original_str,
+                    BufferType::Added => &self.added_str,
+                };
+                let slice = &source[node.index()..node.index() + node.offset()];
+                let chunk = str::from_utf8(slice).unwrap();
+                acc.push_str(chunk);
+                acc
+            });
+        let current_node = self.node_list.get_curr();
+        let source = match current_node.from() {
+            BufferType::Original => &self.original_str,
+            BufferType::Added => &self.added_str,
+        };
+        let slice = &source[current_node.index()..current_node.index() + self.cursor.node_offset];
+        let chunk = str::from_utf8(slice).unwrap();
+        left_str.push_str(chunk);
+
+        let cursor_tag = TextTag::new(Tag::Cursor, left_str.len(), left_str.len() + 1);
+        tags.push(cursor_tag);
+
+        let slice = &source[current_node.index() + self.cursor.node_offset
+            ..current_node.index() + current_node.offset()];
+        let chunk = str::from_utf8(slice).unwrap();
+        left_str.push_str(chunk);
+        left_str = right_iter.fold(left_str, |mut acc, node| {
+            let source = match node.from() {
+                BufferType::Original => &self.original_str,
+                BufferType::Added => &self.added_str,
+            };
+            let slice = &source[node.index()..node.index() + node.offset()];
+            let chunk = str::from_utf8(slice).unwrap();
+            acc.push_str(chunk);
+            acc
+        });
+
+        TaggedText::new(left_str, tags)
     }
 
     pub fn move_cursor_up(&mut self) {

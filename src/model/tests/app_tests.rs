@@ -38,7 +38,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Read));
+        app.set_mode(AppMode::Command(CommandMode::Read));
         app.command_buffer = Buffer::with_contents(file_path_string);
 
         app.open_file();
@@ -63,7 +63,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Read));
+        app.set_mode(AppMode::Command(CommandMode::Read));
         app.command_buffer = Buffer::with_contents(file_path_string.clone());
 
         app.open_file();
@@ -101,7 +101,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Read));
+        app.set_mode(AppMode::Command(CommandMode::Read));
         app.command_buffer = Buffer::with_contents(file_path_string.clone());
 
         app.open_file();
@@ -117,7 +117,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.set_mode(AppMode::Command(CommandMode::Write));
         app.command_buffer = Buffer::with_contents(file_path_string);
         app.buffer = Buffer::with_contents(String::from("Testing Write!"));
 
@@ -152,7 +152,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.set_mode(AppMode::Command(CommandMode::Write));
         app.command_buffer = Buffer::with_contents(file_path_string.clone());
         app.buffer = Buffer::with_contents(String::from("Testing Write, this should fail!"));
 
@@ -175,7 +175,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.set_mode(AppMode::Command(CommandMode::Write));
         app.command_buffer = Buffer::with_contents(String::from("Gap Buffers!"));
 
         let text_as_iter = app.get_text_based_on_mode();
@@ -187,7 +187,7 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Read));
+        app.set_mode(AppMode::Command(CommandMode::Read));
         app.command_buffer = Buffer::with_contents(String::from("Rope!"));
 
         let text_as_iter = app.get_text_based_on_mode();
@@ -223,7 +223,7 @@ mod app_tests {
         let mut app = App::new(&args);
 
         app.handle_regular_save();
-        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
+        assert_eq!(app.mode(), AppMode::Command(CommandMode::Write));
     }
 
     #[test]
@@ -236,12 +236,12 @@ mod app_tests {
         // Prepare the application
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.set_mode(AppMode::Command(CommandMode::Write));
         app.command_buffer = Buffer::with_contents(file_path_string);
         app.buffer = Buffer::with_contents(String::from("Testing Write!"));
 
         app.handle_regular_save();
-        assert_eq!(app.app_mode(), AppMode::Edit);
+        assert_eq!(app.mode(), AppMode::Edit);
 
         let saved_text = fs::read_to_string(file_path)?;
         assert_eq!(
@@ -259,7 +259,7 @@ mod app_tests {
         let mut app = App::new(&args);
 
         app.handle_save_as_new_file();
-        assert_eq!(app.app_mode(), AppMode::Command(CommandMode::Write));
+        assert_eq!(app.mode(), AppMode::Command(CommandMode::Write));
     }
 
     #[test]
@@ -282,7 +282,7 @@ mod app_tests {
         // Note that both buffers are empty and we start the app in edit mode
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Write));
+        app.set_mode(AppMode::Command(CommandMode::Write));
 
         app.add_char('a');
         app.add_char('b');
@@ -297,7 +297,7 @@ mod app_tests {
         // Note that both buffers are empty and we start the app in edit mode
         let args: Vec<String> = Vec::new();
         let mut app = App::new(&args);
-        app.set_app_mode(AppMode::Command(CommandMode::Read));
+        app.set_mode(AppMode::Command(CommandMode::Read));
 
         app.add_char('a');
         app.add_char('b');

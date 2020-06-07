@@ -1,8 +1,11 @@
+use std::collections::HashMap;
 use std::env;
 use std::io;
+
 use termion::event::Key;
 use termion::raw::IntoRawMode;
 use tui::backend::TermionBackend;
+use tui::style::{Color, Style};
 use tui::Terminal;
 
 mod utils;
@@ -11,16 +14,22 @@ use crate::utils::QuitOption;
 
 mod model;
 use crate::model::app::{App, AppMode, CommandMode};
+use crate::model::taggedtext::TaggedText;
+use crate::model::texttag::*;
 
 mod view;
-use crate::view::View;
+use crate::view::*;
 
 fn main() -> Result<(), io::Error> {
-    println!("Hello, world!");
     // Setup buffers, load configs
     // Construct program state
     let args: Vec<String> = env::args().collect();
     let mut app: App = App::new(&args);
+
+    // Load the view configs
+    let mut tag_to_func = HashMap::new();
+    // TODO: eventually this should be loading such configurations from a file
+    tag_to_func.insert(Tag::Cursor, view::StyleFunc { f: |arg_1| arg_1 });
 
     // Construct the event queue
     let events = Events::new();
@@ -29,7 +38,7 @@ fn main() -> Result<(), io::Error> {
     let stdout = io::stdout().into_raw_mode()?;
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let mut view = View::new(terminal);
+    let mut view = View::new(terminal, tag_to_func);
 
     // Loop:
     // get next event from event queue
@@ -64,7 +73,7 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
         Event::Input {
             key: Key::Char('\n'),
             ..
-        } => match app.app_mode() {
+        } => match app.mode() {
             // If in command mode, pressing enter means you want
             // to enter the command
             AppMode::Command(CommandMode::Write) => {
@@ -131,7 +140,7 @@ fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
             key: Key::Ctrl('o'),
             ..
         } => {
-            app.set_app_mode(AppMode::Command(CommandMode::Read));
+            app.set_mode(AppMode::Command(CommandMode::Read));
             Ok(QuitOption::NotQuitting)
         }
         _ => Ok(QuitOption::NotQuitting),
