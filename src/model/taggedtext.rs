@@ -1,6 +1,6 @@
 use super::texttag::TextTag;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TaggedText {
     text: String,
     tags: Vec<TextTag>,
@@ -22,6 +22,14 @@ impl TaggedText {
 
     pub fn tags(&self) -> &Vec<TextTag> {
         &self.tags
+    }
+
+    pub fn push_tag(&mut self, texttag: TextTag) {
+        let idx_result = self.tags.binary_search(&texttag);
+        match idx_result {
+            Ok(idx) => self.tags.insert(idx, texttag),
+            Err(idx) => self.tags.insert(idx, texttag),
+        };
     }
 
     pub fn text_mut(&mut self) -> &mut String {

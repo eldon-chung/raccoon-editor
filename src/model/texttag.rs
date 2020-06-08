@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct TextTag {
     tag: Tag,
     start_idx: usize,
