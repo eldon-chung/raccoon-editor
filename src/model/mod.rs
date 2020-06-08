@@ -10,20 +10,25 @@ use texttag::TextTag;
 
 macro_rules! min {
     ($x:expr, $y:expr) => {
-        if $x < $y
-        {$x} else {$y}
-    }
+        if $x < $y {
+            $x
+        } else {
+            $y
+        }
+    };
 }
 
 macro_rules! max {
     ($x:expr, $y:expr) => {
-        if $x > $y
-        {$x} else {$y}
-    }
+        if $x > $y {
+            $x
+        } else {
+            $y
+        }
+    };
 }
 
 pub fn apply_syntax_tags(mut tagged_text: TaggedText) -> Vec<TaggedText> {
-
     if tagged_text.text() == "" {
         return vec![tagged_text];
     }
@@ -41,7 +46,7 @@ pub fn apply_syntax_tags(mut tagged_text: TaggedText) -> Vec<TaggedText> {
         to_return.push(TaggedText::new(string, Vec::new()));
 
         let last_length = cumulative_lengths.last().unwrap();
-        cumulative_lengths.push(last_length + line.len() + 1 );
+        cumulative_lengths.push(last_length + line.len() + 1);
     }
 
     let mut tags = tagged_text.tags_mut();
@@ -60,20 +65,22 @@ pub fn apply_syntax_tags(mut tagged_text: TaggedText) -> Vec<TaggedText> {
             let start = max!(tag.start_idx(), cumulative_lengths[idx]);
             let end = min!(tag.end_idx(), cumulative_lengths[idx + 1] - 1);
 
-            let texttag = TextTag::new(tag.tag(), start - cumulative_lengths[idx], end - cumulative_lengths[idx]);
+            let texttag = TextTag::new(
+                tag.tag(),
+                start - cumulative_lengths[idx],
+                end - cumulative_lengths[idx],
+            );
             to_return[idx].push_tag(texttag);
         }
-
     }
 
     to_return
-
 }
 
 #[cfg(test)]
-mod model_tests{
-    use super::*;
+mod model_tests {
     use super::texttag::*;
+    use super::*;
 
     #[test]
     fn apply_syntax_tags_on_empty_text() {
