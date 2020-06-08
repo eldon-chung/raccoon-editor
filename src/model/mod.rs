@@ -44,9 +44,6 @@ pub fn apply_syntax_tags(mut tagged_text: TaggedText) -> Vec<TaggedText> {
         cumulative_lengths.push(last_length + line.len() + 1 );
     }
 
-    #[cfg(test)]
-    println!("cumulative_lengths {:?}", cumulative_lengths);
-
     let mut tags = tagged_text.tags_mut();
     for tag in tags {
         let left_idx = match cumulative_lengths.binary_search(&tag.start_idx()) {
