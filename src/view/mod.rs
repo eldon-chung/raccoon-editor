@@ -125,10 +125,12 @@ mod scroller {
     fn scroll(y_offset: &mut u16, x_offset: &mut u16, direction: ScrollDirection, scroll_amount: u16) {
         match direction {
             ScrollDirection::Up => {
+                eprintln!("scroll up");
                 *y_offset += scroll_amount;
             }
 
             ScrollDirection::Down => {
+                eprintln!("scroll down from offset {} by amount {}", *y_offset, scroll_amount);
                 *y_offset = match (*y_offset).checked_sub(scroll_amount) {
                     Some(v) => v,
                     None => 0,
@@ -136,6 +138,7 @@ mod scroller {
             }
 
             ScrollDirection::Left => {
+                eprintln!("scroll left");
                 *x_offset = match (*x_offset).checked_add(scroll_amount) {
                     Some(v) => v,
                     None => 0,
@@ -143,6 +146,7 @@ mod scroller {
             }
 
             ScrollDirection::Right => {
+                eprintln!("scroll right");
                 *x_offset = match (*x_offset).checked_sub(scroll_amount) {
                     Some(v) => v,
                     None => 0,
@@ -164,7 +168,7 @@ mod scroller {
         let mut x: u16 = 0;
         let mut y: u16 = 0;
         let mut selected_texts = Vec::new();
-        let max_height = window.height - 3; // compensate for mode title line
+        let max_height = window.height - 3; // compensate for terminal border
         
         for line in tagged_texts {
             let mut selected_line = Vec::new();
@@ -186,11 +190,12 @@ mod scroller {
                                                         .collect();
 
                 if cursors.len() > 0 {
-                    if y - *y_offset <= 0 {
+                    if y < *y_offset {
+                        eprintln!("y {} offset {}", y, *y_offset);
                         scroll(y_offset, x_offset, ScrollDirection::Down, *y_offset - y);
                     }
 
-                    if y - *y_offset > max_height {
+                    if y > *y_offset + max_height {
                         scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
                     }
                 }
@@ -222,7 +227,7 @@ mod scroller {
         let mut x: u16 = 0;
         let mut y: u16 = 0;
         let mut selected_texts = Vec::new();
-        let max_height = window.height - 3; // compensate for mode title line
+        let max_height = window.height - 3; // compensate for terminal border
 
         for line in tagged_texts {
             let mut selected_line = Vec::new();
@@ -236,19 +241,19 @@ mod scroller {
                                                         .collect();
 
                 if cursors.len() > 0 {
-                    if x - *x_offset <= 0 {
+                    if x < *x_offset {
                         scroll(y_offset, x_offset, ScrollDirection::Right, *x_offset - x);
                     }
 
-                    if x - *x_offset > window.width {
+                    if x > *x_offset + window.width {
                         scroll(y_offset, x_offset, ScrollDirection::Left, x - *x_offset - window.width);
                     }
 
-                    if y - *y_offset <= 0 {
+                    if y < *y_offset {
                         scroll(y_offset, x_offset, ScrollDirection::Down, *y_offset - y);
                     }
 
-                    if y - *y_offset > max_height {
+                    if y > *y_offset + max_height {
                         scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
                     }
                 }
