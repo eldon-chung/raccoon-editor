@@ -125,12 +125,10 @@ mod scroller {
     fn scroll(y_offset: &mut u16, x_offset: &mut u16, direction: ScrollDirection, scroll_amount: u16) {
         match direction {
             ScrollDirection::Up => {
-                eprintln!("scroll up");
                 *y_offset += scroll_amount;
             }
 
             ScrollDirection::Down => {
-                eprintln!("scroll down from offset {} by amount {}", *y_offset, scroll_amount);
                 *y_offset = match (*y_offset).checked_sub(scroll_amount) {
                     Some(v) => v,
                     None => 0,
@@ -138,7 +136,6 @@ mod scroller {
             }
 
             ScrollDirection::Left => {
-                eprintln!("scroll left");
                 *x_offset = match (*x_offset).checked_add(scroll_amount) {
                     Some(v) => v,
                     None => 0,
@@ -146,7 +143,6 @@ mod scroller {
             }
 
             ScrollDirection::Right => {
-                eprintln!("scroll right");
                 *x_offset = match (*x_offset).checked_sub(scroll_amount) {
                     Some(v) => v,
                     None => 0,
@@ -165,24 +161,26 @@ mod scroller {
      * @return: selected_texts
      */
     fn select_with_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
-        let mut x: u16 = 0;
-        let mut y: u16 = 0;
+        let mut x: u16 = 0; // current line width
+        let mut y: u16 = 0; // current displayed line
         let mut selected_texts = Vec::new();
         let max_height = window.height - 3; // compensate for terminal border
+        let max_width = window.width - 1; // compensate for terminal border
         
         for line in tagged_texts {
             let mut selected_line = Vec::new();
 
             for word in line {
-                if x >= window.width {
+
+                let add_width = (word.text().width() + " ".width()) as u16;
+                if x + add_width > max_width {
                     selected_texts.push(selected_line);
                     selected_line = Vec::new();
-                    x = 0;
+                    selected_line.push(word);
+                    x = add_width;
                     y += 1;
                     continue;
                 }
-
-                x += (word.text().width() + " ".width()) as u16;
 
                 let cursors: Vec<TextTag> = word.tags().iter()
                                                         .map(|x| *x)
@@ -191,7 +189,6 @@ mod scroller {
 
                 if cursors.len() > 0 {
                     if y < *y_offset {
-                        eprintln!("y {} offset {}", y, *y_offset);
                         scroll(y_offset, x_offset, ScrollDirection::Down, *y_offset - y);
                     }
 
@@ -200,7 +197,9 @@ mod scroller {
                     }
                 }
                 
+                x += add_width;
                 selected_line.push(word);
+
             }
 
             selected_texts.push(selected_line);
@@ -224,10 +223,11 @@ mod scroller {
      * @return: to_return
      */
     fn select_without_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
-        let mut x: u16 = 0;
-        let mut y: u16 = 0;
+        let mut x: u16 = 0; // current line width
+        let mut y: u16 = 0; // current displayed line
         let mut selected_texts = Vec::new();
         let max_height = window.height - 3; // compensate for terminal border
+        let max_width = window.width - 1; // compensate for terminal border
 
         for line in tagged_texts {
             let mut selected_line = Vec::new();
@@ -245,8 +245,8 @@ mod scroller {
                         scroll(y_offset, x_offset, ScrollDirection::Right, *x_offset - x);
                     }
 
-                    if x > *x_offset + window.width {
-                        scroll(y_offset, x_offset, ScrollDirection::Left, x - *x_offset - window.width);
+                    if x > *x_offset + max_width {
+                        scroll(y_offset, x_offset, ScrollDirection::Left, x - *x_offset - max_width);
                     }
 
                     if y < *y_offset {
