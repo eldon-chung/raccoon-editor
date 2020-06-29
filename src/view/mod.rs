@@ -24,6 +24,8 @@ pub struct View<B: Backend> {
     // Probably want to include layout details
     //  here eventually.
     tag_to_func: HashMap<Tag, StyleFunc>,
+    y_offset: u16,
+    x_offset: u16,
 }
 
 impl<B: Backend> View<B> {
@@ -31,35 +33,256 @@ impl<B: Backend> View<B> {
         View {
             terminal: terminal,
             tag_to_func: tag_to_func,
+            y_offset: 0,
+            x_offset: 0,
         }
     }
 
+    pub fn update_offset(&mut self, y_offset: u16, x_offset: u16) {
+        self.y_offset = y_offset;
+        self.x_offset = x_offset;
+    }
+
     pub fn update_display(&mut self, app: &App) -> Result<(), io::Error> {
-        let (tagged_text, title) = match app.mode() {
+        let (tagged_texts, title) = match app.mode() {
             AppMode::Command(CommandMode::Read) => (
-                app.get_command_buffer_as_tagged_text(),
+                app.get_command_buffer_as_tagged_text_vector(),
                 "Command mode: Opening a file",
             ),
             AppMode::Command(CommandMode::Write) => (
-                app.get_command_buffer_as_tagged_text(),
+                app.get_command_buffer_as_tagged_text_vector(),
                 "Command mode: Saving into file",
             ),
-            AppMode::Edit => (app.get_buffer_as_tagged_text(), "Edit mode"),
+            AppMode::Edit => (app.get_buffer_as_tagged_text_vector(), "Edit mode"),
         };
-
-        let text: Vec<_> = highlighter::highlight_tagged_text(&tagged_text, &self.tag_to_func);
+        let size = self.terminal.get_frame().size();
+        let (mut y_offset, mut x_offset) = (self.y_offset, self.x_offset);
+        let scrolled_text = scroller::render(&mut y_offset, &mut x_offset, tagged_texts, size, true);
+        let text: Vec<_> = highlighter::highlight_tagged_text(&scrolled_text, &self.tag_to_func);
+     
         self.terminal.draw(|mut f| {
-            let size = f.size();
             let block = Paragraph::new(text.iter())
                 .block(Block::default().title(title).borders(Borders::ALL))
                 .style(Style::default().fg(Color::White).bg(Color::Black))
                 .alignment(Alignment::Left)
-                .wrap(true);
+                .wrap(false);
             f.render_widget(block, size);
         })?;
+        self.update_offset(y_offset, x_offset);
         self.terminal.hide_cursor()?;
 
         Ok(())
+    }
+}
+
+mod scroller {
+    use tui::layout::Rect;
+
+    use unicode_width::UnicodeWidthStr;
+    use unicode_width::UnicodeWidthChar;
+
+    use std::convert::TryInto;
+
+    use crate::model::taggedtext::TaggedText;
+    use crate::model::texttag::{TextTag, Tag};
+
+    /* Supported directions of scrolling */
+    #[derive(Clone, Copy, Debug, PartialEq)]
+    pub enum ScrollDirection {
+        Up,
+        Down,
+        Left,
+        Right,
+    }
+
+    pub fn render(
+        y_offset: &mut u16, x_offset: &mut u16, 
+        tagged_texts: Vec<TaggedText>, 
+        window: Rect, wrap: bool
+    ) -> TaggedText {
+
+        let mut split_text: Vec<Vec<TaggedText>> = Vec::new();
+        for line in tagged_texts {
+            split_text.push(line.split_whitespace());
+        }
+
+        let mut selected_texts = Vec::new();
+        if wrap {
+            selected_texts = select_with_wrap(y_offset, x_offset, split_text, window);
+        } else {
+            selected_texts = select_without_wrap(y_offset, x_offset, split_text, window);
+        }
+
+        TaggedText::join(selected_texts, '\n')                            
+    }
+
+    /**
+     * Scroll text in the specified direction by the given amount.
+     * 
+     * @param direction
+     * @param scroll_amount
+     */
+    fn scroll(y_offset: &mut u16, x_offset: &mut u16, direction: ScrollDirection, scroll_amount: u16) {
+        match direction {
+            ScrollDirection::Up => {
+                *y_offset += scroll_amount;
+            }
+
+            ScrollDirection::Down => {
+                *y_offset = match (*y_offset).checked_sub(scroll_amount) {
+                    Some(v) => v,
+                    None => 0,
+                }
+            }
+
+            ScrollDirection::Left => {
+                *x_offset = match (*x_offset).checked_add(scroll_amount) {
+                    Some(v) => v,
+                    None => 0,
+                }
+            }
+
+            ScrollDirection::Right => {
+                *x_offset = match (*x_offset).checked_sub(scroll_amount) {
+                    Some(v) => v,
+                    None => 0,
+                }
+            }
+
+            _ => {}
+        }
+    }
+
+    /**
+     * Select a portion of text to fit the window area (with wrapping)
+     * 
+     * @param: tagged_texts
+     * 
+     * @return: selected_texts
+     */
+    fn select_with_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
+        let mut x: u16 = 0;
+        let mut y: u16 = 0;
+        let mut selected_texts = Vec::new();
+        let max_height = window.height - 3; // compensate for mode title line
+        
+        for line in tagged_texts {
+            let mut selected_line = Vec::new();
+
+            for word in line {
+                if x >= window.width {
+                    selected_texts.push(selected_line);
+                    selected_line = Vec::new();
+                    x = 0;
+                    y += 1;
+                    continue;
+                }
+
+                x += (word.text().width() + " ".width()) as u16;
+
+                let cursors: Vec<TextTag> = word.tags().iter()
+                                                        .map(|x| *x)
+                                                        .filter(|x| x.tag() == Tag::Cursor)
+                                                        .collect();
+
+                if cursors.len() > 0 {
+                    if y - *y_offset <= 0 {
+                        scroll(y_offset, x_offset, ScrollDirection::Down, *y_offset - y);
+                    }
+
+                    if y - *y_offset > max_height {
+                        scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
+                    }
+                }
+                
+                selected_line.push(word);
+            }
+
+            selected_texts.push(selected_line);
+            selected_line = Vec::new();
+            x = 0;
+            y += 1;
+        }
+
+        for i in 0..*y_offset {
+            selected_texts.remove(0);
+        }
+
+        selected_texts.into_iter().map(|x| TaggedText::join(x, ' ')).collect()
+    }
+
+    /**
+     * Select a portion of text to fit the window area (without wrapping)
+     * 
+     * @param: tagged_texts
+     * 
+     * @return: to_return
+     */
+    fn select_without_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
+        let mut x: u16 = 0;
+        let mut y: u16 = 0;
+        let mut selected_texts = Vec::new();
+        let max_height = window.height - 3; // compensate for mode title line
+
+        for line in tagged_texts {
+            let mut selected_line = Vec::new();
+
+            for word in line {
+                x += (word.text().width() + " ".width()) as u16;
+
+                let cursors: Vec<TextTag> = word.tags().iter()
+                                                        .map(|x| *x)
+                                                        .filter(|x| x.tag() == Tag::Cursor)
+                                                        .collect();
+
+                if cursors.len() > 0 {
+                    if x - *x_offset <= 0 {
+                        scroll(y_offset, x_offset, ScrollDirection::Right, *x_offset - x);
+                    }
+
+                    if x - *x_offset > window.width {
+                        scroll(y_offset, x_offset, ScrollDirection::Left, x - *x_offset - window.width);
+                    }
+
+                    if y - *y_offset <= 0 {
+                        scroll(y_offset, x_offset, ScrollDirection::Down, *y_offset - y);
+                    }
+
+                    if y - *y_offset > max_height {
+                        scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
+                    }
+                }
+                selected_line.push(word);
+            }
+
+            selected_texts.push(selected_line);
+            selected_line = Vec::new();
+            x = 0;
+            y += 1;
+        }
+
+        for i in 0..*y_offset{
+            selected_texts.remove(0);
+        }
+
+        let mut to_return: Vec<TaggedText> = selected_texts.into_iter().map(|x| TaggedText::join(x, ' ')).collect();
+
+        for mut line in &mut to_return {
+            let text_mut = line.text_mut();
+            let mut skip_count = 0;
+            let mut skip_width = 0;
+            for c in text_mut.chars() {
+                skip_width += (c.width().unwrap()) as u16;
+                skip_count += 1;
+                if skip_width >= *x_offset {
+                    break;
+                }
+            }
+
+            *text_mut = text_mut.split_off(skip_count);
+        }
+
+        to_return
     }
 }
 

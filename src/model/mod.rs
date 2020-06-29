@@ -37,7 +37,12 @@ pub fn apply_syntax_tags(mut tagged_text: TaggedText) -> Vec<TaggedText> {
 
     let mut text = tagged_text.text_mut().as_str();
 
-    let lines: Vec<_> = text.lines().collect();
+    // use this instead of text.lines() to preserve ending empty string
+    // to avoid index out of bound error & let cursor to be on new line
+    // for e.g. "abc\ndef\n" will be split into ["abc", "def", ""]
+    // instead of the default ["abc", "def"] if split by lines()
+    let mut lines: Vec<_> = text.split("\n").collect();
+
     let mut cumulative_lengths = Vec::new();
     cumulative_lengths.push(0);
 
