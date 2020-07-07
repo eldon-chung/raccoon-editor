@@ -60,7 +60,8 @@ impl<B: Backend> View<B> {
 
         // TODO: allow user input configuration for wrapping
         // Currently, default is no wrap
-        let scrolled_text = scroller::render(&mut y_offset, &mut x_offset, tagged_texts, size, false);
+        let scrolled_text =
+            scroller::render(&mut y_offset, &mut x_offset, tagged_texts, size, false);
         let text: Vec<_> = highlighter::highlight_tagged_text(&scrolled_text, &self.tag_to_func);
 
         self.terminal.draw(|mut f| {
@@ -171,10 +172,15 @@ mod scroller {
      *
      * @return: selected_texts
      */
-    fn select_with_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
+    fn select_with_wrap(
+        y_offset: &mut u16,
+        x_offset: &mut u16,
+        tagged_texts: Vec<Vec<TaggedText>>,
+        window: Rect,
+    ) -> Vec<TaggedText> {
         // TODO: fix bug when moving up/down wrapped text
         // need to split into multiple lines
-        
+
         let mut x: u16 = 0; // current line width
         let mut y: u16 = 0; // current displayed line
         let mut selected_texts = Vec::new();
@@ -263,22 +269,33 @@ mod scroller {
                 let add_width = (word.text().width() + " ".width()) as u16;
                 x += add_width;
 
-                let cursors: Vec<TextTag> = word.tags().iter()
-                                                        .map(|x| *x)
-                                                        .filter(|x| x.tag() == Tag::Cursor)
-                                                        .collect();
+                let cursors: Vec<TextTag> = word
+                    .tags()
+                    .iter()
+                    .map(|x| *x)
+                    .filter(|x| x.tag() == Tag::Cursor)
+                    .collect();
                 if cursors.len() > 0 {
-
                     let cursor = cursors.get(0).unwrap();
                     let cursor_start_idx = x - add_width + cursor.start_idx() as u16;
                     let cursor_end_idx = x - add_width + cursor.end_idx() as u16;
 
                     if cursor_start_idx < *x_offset {
-                        scroll(y_offset, x_offset, ScrollDirection::Right, *x_offset - cursor_start_idx);
+                        scroll(
+                            y_offset,
+                            x_offset,
+                            ScrollDirection::Right,
+                            *x_offset - cursor_start_idx,
+                        );
                     }
 
                     if cursor_end_idx >= *x_offset + max_width {
-                        scroll(y_offset, x_offset, ScrollDirection::Left, cursor_end_idx - *x_offset - max_width + 1);
+                        scroll(
+                            y_offset,
+                            x_offset,
+                            ScrollDirection::Left,
+                            cursor_end_idx - *x_offset - max_width + 1,
+                        );
                     }
 
                     if y < *y_offset {
@@ -308,7 +325,10 @@ mod scroller {
             selected_texts.remove(0);
         }
 
-        let mut to_return: Vec<TaggedText> = selected_texts.iter().map(|x| TaggedText::join(x.to_vec(), ' ')).collect();
+        let mut to_return: Vec<TaggedText> = selected_texts
+            .iter()
+            .map(|x| TaggedText::join(x.to_vec(), ' '))
+            .collect();
 
         if *x_offset > 0 {
             let skip: usize = (*x_offset).try_into().unwrap();
