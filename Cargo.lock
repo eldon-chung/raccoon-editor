@@ -95,6 +95,7 @@ dependencies = [
  "tempfile",
  "termion",
  "tui",
+ "unicode-width",
 ]
 
 [[package]]

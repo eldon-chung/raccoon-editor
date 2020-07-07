@@ -61,6 +61,14 @@ impl App {
         self.mode = mode;
     }
 
+    pub fn get_command_buffer_as_tagged_text_vector(&self) -> Vec<TaggedText> {
+        super::apply_syntax_tags(self.command_buffer.as_tagged_text())
+    }
+
+    pub fn get_buffer_as_tagged_text_vector(&self) -> Vec<TaggedText> {
+        super::apply_syntax_tags(self.buffer.as_tagged_text())
+    }
+
     pub fn get_command_buffer_as_tagged_text(&self) -> TaggedText {
         self.command_buffer.as_tagged_text()
     }
