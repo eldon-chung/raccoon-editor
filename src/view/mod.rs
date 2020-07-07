@@ -57,7 +57,10 @@ impl<B: Backend> View<B> {
         };
         let size = self.terminal.get_frame().size();
         let (mut y_offset, mut x_offset) = (self.y_offset, self.x_offset);
-        let scrolled_text = scroller::render(&mut y_offset, &mut x_offset, tagged_texts, size, true);
+
+        // TODO: allow user input configuration for wrapping
+        // Currently, default is no wrap
+        let scrolled_text = scroller::render(&mut y_offset, &mut x_offset, tagged_texts, size, false);
         let text: Vec<_> = highlighter::highlight_tagged_text(&scrolled_text, &self.tag_to_func);
      
         self.terminal.draw(|mut f| {
@@ -161,6 +164,9 @@ mod scroller {
      * @return: selected_texts
      */
     fn select_with_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
+        // TODO: fix bug when moving up/down wrapped text
+        // need to split into multiple lines
+        
         let mut x: u16 = 0; // current line width
         let mut y: u16 = 0; // current displayed line
         let mut selected_texts = Vec::new();
@@ -233,20 +239,25 @@ mod scroller {
             let mut selected_line = Vec::new();
 
             for word in line {
-                x += (word.text().width() + " ".width()) as u16;
+                let add_width = (word.text().width() + " ".width()) as u16;
+                x += add_width;
 
                 let cursors: Vec<TextTag> = word.tags().iter()
                                                         .map(|x| *x)
                                                         .filter(|x| x.tag() == Tag::Cursor)
                                                         .collect();
-
                 if cursors.len() > 0 {
-                    if x < *x_offset {
-                        scroll(y_offset, x_offset, ScrollDirection::Right, *x_offset - x);
+
+                    let cursor = cursors.get(0).unwrap();
+                    let cursor_start_idx = x - add_width + cursor.start_idx() as u16;
+                    let cursor_end_idx = x - add_width + cursor.end_idx() as u16;
+
+                    if cursor_start_idx < *x_offset {
+                        scroll(y_offset, x_offset, ScrollDirection::Right, *x_offset - cursor_start_idx);
                     }
 
-                    if x > *x_offset + max_width {
-                        scroll(y_offset, x_offset, ScrollDirection::Left, x - *x_offset - max_width);
+                    if cursor_end_idx >= *x_offset + max_width {
+                        scroll(y_offset, x_offset, ScrollDirection::Left, cursor_end_idx - *x_offset - max_width + 1);
                     }
 
                     if y < *y_offset {
@@ -257,6 +268,7 @@ mod scroller {
                         scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
                     }
                 }
+
                 selected_line.push(word);
             }
 
@@ -270,21 +282,19 @@ mod scroller {
             selected_texts.remove(0);
         }
 
-        let mut to_return: Vec<TaggedText> = selected_texts.into_iter().map(|x| TaggedText::join(x, ' ')).collect();
+        let mut to_return: Vec<TaggedText> = selected_texts.iter().map(|x| TaggedText::join(x.to_vec(), ' ')).collect();
 
-        for mut line in &mut to_return {
-            let text_mut = line.text_mut();
-            let mut skip_count = 0;
-            let mut skip_width = 0;
-            for c in text_mut.chars() {
-                skip_width += (c.width().unwrap()) as u16;
-                skip_count += 1;
-                if skip_width >= *x_offset {
-                    break;
+        if *x_offset > 0 {
+            let skip: usize = (*x_offset).try_into().unwrap();
+            for mut line in &mut to_return {
+                let text_mut = line.text_mut();
+                *text_mut = text_mut.split_off(skip);
+
+                let tags_mut = line.tags_mut();
+                for tag in tags_mut {
+                    *tag = TextTag::new(tag.tag(), tag.start_idx() - skip, tag.end_idx() - skip);
                 }
             }
-
-            *text_mut = text_mut.split_off(skip_count);
         }
 
         to_return
