@@ -62,7 +62,7 @@ impl TaggedText {
 
     /**
      * Split TaggedText by whitespace character.
-     * 
+     *
      * @return to_return
      */
     pub fn split_whitespace(self) -> Vec<TaggedText> {
@@ -74,7 +74,7 @@ impl TaggedText {
         let text = self.text();
 
         let mut cumulative_lengths = Vec::new(); // cumulative word lengths
-        cumulative_lengths.push(0);        
+        cumulative_lengths.push(0);
         for word in text.split(" ") {
             to_return.push(TaggedText::new(word.to_string(), Vec::new()));
             let last_length = cumulative_lengths.last().unwrap();
@@ -87,16 +87,16 @@ impl TaggedText {
                 Ok(idx) => idx,
                 Err(idx) => idx - 1,
             };
-    
+
             let right_idx = match cumulative_lengths.binary_search(&tag.end_idx()) {
                 Ok(idx) => idx,
                 Err(idx) => idx,
             };
-    
+
             for idx in left_idx..right_idx {
                 let start = max!(tag.start_idx(), cumulative_lengths[idx]);
                 let end = min!(tag.end_idx(), cumulative_lengths[idx + 1] - 1);
-    
+
                 let text_tag = TextTag::new(
                     tag.tag(),
                     start - cumulative_lengths[idx],
@@ -110,7 +110,7 @@ impl TaggedText {
 
     /**
      * Join multiple TaggedText into a single TaggedText by a specifited delimiter character
-     * 
+     *
      * @param tagged_texts
      * @param delimiter
      */
@@ -124,7 +124,6 @@ impl TaggedText {
         let mut joined_length = 0;
 
         for mut tagged_text in tagged_texts {
-
             let text = tagged_text.text();
             joined_text.push_str(&text);
             joined_text.push(delimiter);
@@ -142,6 +141,4 @@ impl TaggedText {
         }
         TaggedText::new(joined_text, joined_tags)
     }
-
-
 }

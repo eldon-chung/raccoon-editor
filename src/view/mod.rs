@@ -62,7 +62,7 @@ impl<B: Backend> View<B> {
         // Currently, default is no wrap
         let scrolled_text = scroller::render(&mut y_offset, &mut x_offset, tagged_texts, size, false);
         let text: Vec<_> = highlighter::highlight_tagged_text(&scrolled_text, &self.tag_to_func);
-     
+
         self.terminal.draw(|mut f| {
             let block = Paragraph::new(text.iter())
                 .block(Block::default().title(title).borders(Borders::ALL))
@@ -81,13 +81,15 @@ impl<B: Backend> View<B> {
 mod scroller {
     use tui::layout::Rect;
 
-    use unicode_width::UnicodeWidthStr;
     use unicode_width::UnicodeWidthChar;
+    use unicode_width::UnicodeWidthStr;
 
     use std::convert::TryInto;
 
     use crate::model::taggedtext::TaggedText;
-    use crate::model::texttag::{TextTag, Tag};
+    use crate::model::texttag::{Tag, TextTag};
+
+    // TODO: fix cursor display at whitespace
 
     /* Supported directions of scrolling */
     #[derive(Clone, Copy, Debug, PartialEq)]
@@ -99,11 +101,12 @@ mod scroller {
     }
 
     pub fn render(
-        y_offset: &mut u16, x_offset: &mut u16, 
-        tagged_texts: Vec<TaggedText>, 
-        window: Rect, wrap: bool
+        y_offset: &mut u16,
+        x_offset: &mut u16,
+        tagged_texts: Vec<TaggedText>,
+        window: Rect,
+        wrap: bool,
     ) -> TaggedText {
-
         let mut split_text: Vec<Vec<TaggedText>> = Vec::new();
         for line in tagged_texts {
             split_text.push(line.split_whitespace());
@@ -116,16 +119,21 @@ mod scroller {
             selected_texts = select_without_wrap(y_offset, x_offset, split_text, window);
         }
 
-        TaggedText::join(selected_texts, '\n')                            
+        TaggedText::join(selected_texts, '\n')
     }
 
     /**
      * Scroll text in the specified direction by the given amount.
-     * 
+     *
      * @param direction
      * @param scroll_amount
      */
-    fn scroll(y_offset: &mut u16, x_offset: &mut u16, direction: ScrollDirection, scroll_amount: u16) {
+    fn scroll(
+        y_offset: &mut u16,
+        x_offset: &mut u16,
+        direction: ScrollDirection,
+        scroll_amount: u16,
+    ) {
         match direction {
             ScrollDirection::Up => {
                 *y_offset += scroll_amount;
@@ -158,9 +166,9 @@ mod scroller {
 
     /**
      * Select a portion of text to fit the window area (with wrapping)
-     * 
+     *
      * @param: tagged_texts
-     * 
+     *
      * @return: selected_texts
      */
     fn select_with_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
@@ -172,12 +180,11 @@ mod scroller {
         let mut selected_texts = Vec::new();
         let max_height = window.height - 3; // compensate for terminal border
         let max_width = window.width - 1; // compensate for terminal border
-        
+
         for line in tagged_texts {
             let mut selected_line = Vec::new();
 
             for word in line {
-
                 let add_width = (word.text().width() + " ".width()) as u16;
                 if x + add_width > max_width {
                     selected_texts.push(selected_line);
@@ -188,10 +195,12 @@ mod scroller {
                     continue;
                 }
 
-                let cursors: Vec<TextTag> = word.tags().iter()
-                                                        .map(|x| *x)
-                                                        .filter(|x| x.tag() == Tag::Cursor)
-                                                        .collect();
+                let cursors: Vec<TextTag> = word
+                    .tags()
+                    .iter()
+                    .map(|x| *x)
+                    .filter(|x| x.tag() == Tag::Cursor)
+                    .collect();
 
                 if cursors.len() > 0 {
                     if y < *y_offset {
@@ -199,13 +208,17 @@ mod scroller {
                     }
 
                     if y > *y_offset + max_height {
-                        scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
+                        scroll(
+                            y_offset,
+                            x_offset,
+                            ScrollDirection::Up,
+                            y - *y_offset - max_height,
+                        );
                     }
                 }
-                
+
                 x += add_width;
                 selected_line.push(word);
-
             }
 
             selected_texts.push(selected_line);
@@ -218,17 +231,25 @@ mod scroller {
             selected_texts.remove(0);
         }
 
-        selected_texts.into_iter().map(|x| TaggedText::join(x, ' ')).collect()
+        selected_texts
+            .into_iter()
+            .map(|x| TaggedText::join(x, ' '))
+            .collect()
     }
 
     /**
      * Select a portion of text to fit the window area (without wrapping)
-     * 
+     *
      * @param: tagged_texts
-     * 
+     *
      * @return: to_return
      */
-    fn select_without_wrap(y_offset: &mut u16, x_offset: &mut u16, tagged_texts: Vec<Vec<TaggedText>>, window: Rect) -> Vec<TaggedText> {
+    fn select_without_wrap(
+        y_offset: &mut u16,
+        x_offset: &mut u16,
+        tagged_texts: Vec<Vec<TaggedText>>,
+        window: Rect,
+    ) -> Vec<TaggedText> {
         let mut x: u16 = 0; // current line width
         let mut y: u16 = 0; // current displayed line
         let mut selected_texts = Vec::new();
@@ -265,7 +286,12 @@ mod scroller {
                     }
 
                     if y > *y_offset + max_height {
-                        scroll(y_offset, x_offset, ScrollDirection::Up, y - *y_offset - max_height);
+                        scroll(
+                            y_offset,
+                            x_offset,
+                            ScrollDirection::Up,
+                            y - *y_offset - max_height,
+                        );
                     }
                 }
 
@@ -278,7 +304,7 @@ mod scroller {
             y += 1;
         }
 
-        for i in 0..*y_offset{
+        for i in 0..*y_offset {
             selected_texts.remove(0);
         }
 
