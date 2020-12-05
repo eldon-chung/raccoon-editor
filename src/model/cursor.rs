@@ -1,13 +1,11 @@
 #[derive(Debug)]
 pub struct Cursor {
-    column: usize
+    column: usize,
 }
 
 impl Cursor {
     pub fn new() -> Cursor {
-        Cursor {
-            column: 0
-        }
+        Cursor { column: 0 }
     }
 
     pub fn column(&self) -> usize {
