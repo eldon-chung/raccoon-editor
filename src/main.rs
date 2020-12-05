@@ -1,8 +1,8 @@
 use std::io;
-use tui::Terminal;
-use tui::backend::TermionBackend;
-use termion::raw::IntoRawMode;
 use termion::event::Key;
+use termion::raw::IntoRawMode;
+use tui::backend::TermionBackend;
+use tui::Terminal;
 
 mod utils;
 use crate::utils::events::{Event, Events};
@@ -33,47 +33,55 @@ fn main() -> Result<(), io::Error> {
     // get next event from event queue
     // handle next event, update program state
     loop {
-    	view.update_display(&app)?;
+        view.update_display(&app)?;
 
-    	let event = match events.next() {
-    		Ok(event) => event,
-    		Err(e) => panic!("{:?}", e),
-    	};
+        let event = match events.next() {
+            Ok(event) => event,
+            Err(e) => panic!("{:?}", e),
+        };
 
-    	match handle_event(event, &mut app) {
-    		Ok(QuitOption::Quitting) => break,
-    		Ok(QuitOption::NotQuitting) => {},
-    		Err(x) => panic!("{:?}", x),
-    	};
+        match handle_event(event, &mut app) {
+            Ok(QuitOption::Quitting) => break,
+            Ok(QuitOption::NotQuitting) => {}
+            Err(x) => panic!("{:?}", x),
+        };
     }
 
     Ok(())
 }
 
 fn handle_event(event: Event, app: &mut App) -> Result<QuitOption, ()> {
-	match event {
+    match event {
         // Full list of keys can be found at
         // https://docs.rs/termion/1.1.1/termion/event/enum.Key.html
-		Event::Tick{..} => Ok(QuitOption::NotQuitting),
-		Event::Input{key: Key::Char('q'), ..} => Ok(QuitOption::Quitting),
-		Event::Input{key: Key::Char(c), ..} => {
-			app.add_char(c);
-			Ok(QuitOption::NotQuitting)
-		},
-		Event::Input{key: Key::Backspace, ..} => {
-			app.remove_char();
-			Ok(QuitOption::NotQuitting)
-		},
-        Event::Input{key: Key::Right, ..} => {
+        Event::Tick { .. } => Ok(QuitOption::NotQuitting),
+        Event::Input {
+            key: Key::Char('q'),
+            ..
+        } => Ok(QuitOption::Quitting),
+        Event::Input {
+            key: Key::Char(c), ..
+        } => {
+            app.add_char(c);
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input {
+            key: Key::Backspace,
+            ..
+        } => {
+            app.remove_char();
+            Ok(QuitOption::NotQuitting)
+        }
+        Event::Input {
+            key: Key::Right, ..
+        } => {
             app.move_cursor_right();
             Ok(QuitOption::NotQuitting)
-        },
-        Event::Input{key: Key::Left, ..} => {
+        }
+        Event::Input { key: Key::Left, .. } => {
             app.move_cursor_left();
             Ok(QuitOption::NotQuitting)
         }
-		_ => Ok(QuitOption::NotQuitting),
-	}
-
+        _ => Ok(QuitOption::NotQuitting),
+    }
 }
-
