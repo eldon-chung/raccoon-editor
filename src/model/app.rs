@@ -1,4 +1,5 @@
 use super::buffer::Buffer;
+use super::cursor::Cursor;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum AppMode {
@@ -8,7 +9,7 @@ pub enum AppMode {
 
 pub struct App {
     buffer: Buffer,
-    cursor_position: usize,
+    cursor: Cursor,
     app_mode: AppMode,
 }
 
@@ -16,7 +17,7 @@ impl App {
     pub fn new() -> App {
         App {
             buffer: Buffer::new(),
-            cursor_position: 0,
+            cursor: Cursor::new(),
             app_mode: AppMode::Edit,
         }
     }
@@ -24,10 +25,6 @@ impl App {
     // App should only release immutable references to the buffer?
     pub fn buffer(&self) -> &Buffer {
         &self.buffer
-    }
-
-    pub fn cursor_position(&self) -> usize {
-        self.cursor_position
     }
 
     pub fn app_mode(&self) -> AppMode {
@@ -39,26 +36,26 @@ impl App {
     }
 
     pub fn add_char(&mut self, c: char) {
-        self.buffer.insert(self.cursor_position, c);
-        self.cursor_position += 1;
+        self.buffer.insert(&self.cursor, c);
+        self.cursor.move_right();
     }
 
     pub fn remove_char(&mut self) {
-        if self.cursor_position > 1 {
-            self.cursor_position -= 1;
-            self.buffer.remove(self.cursor_position);
+        if self.cursor.column() > 1 {
+            self.cursor.move_left();
+            self.buffer.remove(&self.cursor);
         }
     }
 
     pub fn move_cursor_left(&mut self) {
-        if self.cursor_position > 0 {
-            self.cursor_position -= 1;
+        if self.cursor.column() > 0 {
+            self.cursor.move_left();
         }
     }
 
     pub fn move_cursor_right(&mut self) {
-        if self.cursor_position < self.buffer.len() - 1 {
-            self.cursor_position += 1;
+        if self.cursor.column() < self.buffer.len() - 1 {
+            self.cursor.move_right();
         }
     }
 }

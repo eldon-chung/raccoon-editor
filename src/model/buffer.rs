@@ -1,3 +1,5 @@
+use super::cursor::Cursor;
+
 pub struct Buffer {
     contents: String,
 }
@@ -13,16 +15,16 @@ impl Buffer {
         Buffer { contents: string }
     }
 
-    pub fn insert(&mut self, idx: usize, ch: char) {
-        self.contents.insert(idx, ch);
+    pub fn insert(&mut self, cursor: &Cursor, ch: char) {
+        self.contents.insert(cursor.column(), ch);
     }
 
-    pub fn insert_str(&mut self, idx: usize, string: &str) {
-        self.contents.insert_str(idx, string);
+    pub fn insert_str(&mut self, cursor: &Cursor, string: &str) {
+        self.contents.insert_str(cursor.column(), string);
     }
 
-    pub fn remove(&mut self, idx: usize) -> char {
-        self.contents.remove(idx)
+    pub fn remove(&mut self, cursor: &Cursor) -> char {
+        self.contents.remove(cursor.column())
     }
 
     pub fn as_str(&self) -> &str {
