@@ -16,7 +16,9 @@ impl Buffer {
     }
 
     pub fn with_string(string: String) -> Buffer {
-        Buffer { contents: string_to_vec(string) }
+        Buffer {
+            contents: string_to_vec(string),
+        }
     }
 
     pub fn insert(&mut self, cursor: &Cursor, ch: char) {
