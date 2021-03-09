@@ -28,3 +28,4 @@ impl Cursor {
         self.column -= 1;
     }
 }
+
