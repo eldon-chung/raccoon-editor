@@ -1,17 +1,23 @@
 #[derive(Debug)]
 pub struct Cursor {
-    column: usize
+    column: usize,
+    row: usize
 }
 
 impl Cursor {
     pub fn new() -> Cursor {
         Cursor {
-            column: 0
+            column: 0,
+            row: 0
         }
     }
 
     pub fn column(&self) -> usize {
         self.column
+    }
+
+    pub fn row(&self) -> usize {
+        self.row
     }
 
     pub fn move_right(&mut self) {

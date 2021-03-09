@@ -1,37 +1,33 @@
 use super::cursor::Cursor;
 
 pub struct Buffer {
-    contents: String,
+    contents: Vec<Vec<char>>,
 }
 
 impl Buffer {
     pub fn new() -> Buffer {
         Buffer {
-            contents: String::new(),
+            contents: vec![Vec::new()],
         }
     }
 
+    fn string_to_vec(string: String) -> Vec<char> {
+        string.chars().collect()
+    }
+
     pub fn with_string(string: String) -> Buffer {
-        Buffer { contents: string }
+        Buffer { contents: string_to_vec(string) }
     }
 
     pub fn insert(&mut self, cursor: &Cursor, ch: char) {
-        self.contents.insert(cursor.column(), ch);
-    }
-
-    pub fn insert_str(&mut self, cursor: &Cursor, string: &str) {
-        self.contents.insert_str(cursor.column(), string);
+        self.contents[cursor.row()].insert(cursor.column(), ch);
     }
 
     pub fn remove(&mut self, cursor: &Cursor) -> char {
-        self.contents.remove(cursor.column())
+        self.contents[cursor.row()].remove(cursor.column())
     }
 
     pub fn as_str(&self) -> &str {
-        self.contents.as_str()
-    }
-
-    pub fn len(&self) -> usize {
-        self.contents.len()
+        self.contents.iter().collect()
     }
 }
