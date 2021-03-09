@@ -17,7 +17,7 @@ impl Buffer {
 
     pub fn with_string(string: String) -> Buffer {
         Buffer {
-            contents: vec![string.chars().collect()]
+            contents: vec![string.chars().collect()],
         }
     }
 
@@ -30,7 +30,10 @@ impl Buffer {
     }
 
     pub fn as_str(&self) -> String {
-        self.contents.iter().fold(String::new(), |mut acc, s| {acc.push_str(&s.iter().cloned().collect::<String>()); acc})
+        self.contents.iter().fold(String::new(), |mut acc, s| {
+            acc.push_str(&s.iter().cloned().collect::<String>());
+            acc
+        })
     }
 
     pub fn num_lines(&self) -> usize {
