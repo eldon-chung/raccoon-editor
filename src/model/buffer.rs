@@ -30,13 +30,18 @@ impl Buffer {
     }
 
     pub fn as_str(&self) -> String {
-        self.contents.iter().fold(String::new(), |mut acc, s| {
-            acc.push_str(&s.iter().cloned().collect::<String>());
+        self.contents.iter().fold(String::new(), |mut acc, line| {
+            acc.push_str(&line.iter().cloned().collect::<String>());
+            acc.push_str("\n");
             acc
         })
     }
 
     pub fn num_lines(&self) -> usize {
         self.contents.len()
+    }
+
+    pub fn len_at_col(&self, cursor: &Cursor) -> usize {
+        self.contents[cursor.row()].len()
     }
 }
